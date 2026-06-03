@@ -27,11 +27,9 @@ function StatesIndex() {
   return (
     <div className="max-w-2xl mx-auto px-5 pt-8 pb-12 space-y-6">
       <header>
-        <div className="text-[11px] uppercase tracking-[0.25em] text-gold/90">
-          Where should you go tonight?
-        </div>
+        <div className="section-label">Choose Your State</div>
         <h1 className="font-display text-3xl sm:text-4xl mt-1.5">
-          Six worlds are live.
+          America is live.
         </h1>
         <p className="text-sm text-muted-foreground mt-2 max-w-md leading-relaxed">
           Each state has its own culture, its own conversations, and its own energy.

@@ -6,7 +6,7 @@ import { RankSystem } from "@/components/RankSystem";
 import {
   Shield, MapPin, Award, Sparkles, Flame, Trophy, Mic2,
   MessageSquare, Hash, Heart, Users, Clock, Compass, CheckCircle2,
-  Circle,
+  Circle, Crown,
 } from "lucide-react";
 
 export const Route = createFileRoute("/me")({
@@ -82,37 +82,42 @@ function Me() {
     <div className="relative pb-16">
       {/* HERO — CITIZEN PASSPORT */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[oklch(0.18_0.06_260)] via-[oklch(0.14_0.05_262)] to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#080F24] via-[#0E1A38] to-transparent" />
         <div className="absolute inset-0 particles" />
         <div className="relative max-w-2xl mx-auto px-5 pt-8 pb-6">
-          <div className="flex items-center justify-between">
-            <div className="text-[11px] uppercase tracking-[0.3em] text-gold/90">
-              Citizen Passport
-            </div>
-            <div className="text-[10px] uppercase tracking-widest text-foreground/50">
-              No. 000482
-            </div>
-          </div>
-
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-5 glass-strong rounded-3xl p-5 relative overflow-hidden"
+            className="rounded-3xl p-5 relative overflow-hidden border"
+            style={{
+              background: "linear-gradient(160deg, #080F24 0%, #0E1A38 55%, #141F42 100%)",
+              borderColor: "rgba(201,168,76,0.4)",
+            }}
           >
             <div
-              className="absolute -top-16 -right-12 h-44 w-44 rounded-full blur-3xl opacity-60"
+              className="absolute -top-20 -right-16 h-52 w-52 rounded-full blur-3xl opacity-50"
               style={{ background: home.glow }}
             />
-            <div className="relative flex items-center gap-4">
+            <div className="relative flex items-center justify-between">
+              <div className="section-label">Citizen Passport</div>
+              <div
+                className="text-gold tabular-nums font-semibold tracking-[0.2em] text-sm"
+                style={{ fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}
+              >
+                No. 000482
+              </div>
+            </div>
+
+            <div className="relative mt-5 flex items-center gap-4">
               <div className="relative">
                 <div className="h-16 w-16 rounded-2xl glass-gold flex items-center justify-center text-2xl text-gold">
                   JR
                 </div>
-                <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-emerald-400 ring-2 ring-[oklch(0.14_0.05_262)] animate-pulse" />
+                <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-emerald-400 ring-2 ring-[#0E1A38] animate-pulse" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-foreground/60">
-                  <MapPin className="h-3 w-3" /> {home.name} Citizen
+                <div className="section-label flex items-center gap-1">
+                  <MapPin className="h-3 w-3" /> {home.name}
                 </div>
                 <h1 className="font-display text-2xl leading-none mt-1">Jordan Reyes</h1>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
@@ -132,6 +137,9 @@ function Me() {
 
       <main className="max-w-2xl mx-auto px-5 space-y-8">
         <RankSystem />
+
+        <PathToGovernor />
+
 
         {/* CITIZEN IDENTITY */}
         <section>
@@ -346,5 +354,48 @@ function Lifetime({ k, v }: { k: string; v: string }) {
       <div className="font-display text-lg tabular-nums">{v}</div>
       <div className="text-[10px] uppercase tracking-widest text-foreground/55">{k}</div>
     </div>
+  );
+}
+
+/* ---------- Path to Governor ---------- */
+
+const GOVERNOR_TASKS: { label: string; done: boolean; progress: string }[] = [
+  { label: "Messages",          done: true,  progress: "512 of 500 sent" },
+  { label: "Rooms Explored",    done: false, progress: "3 of 4 rooms visited (30m+)" },
+  { label: "Reactions Received", done: true,  progress: "84 of 50" },
+  { label: "Citizens Referred", done: false, progress: "1 of 3" },
+  { label: "Citizen Report Filed", done: false, progress: "No" },
+];
+
+function PathToGovernor() {
+  return (
+    <section>
+      <div className="glass-strong rounded-2xl p-5 relative overflow-hidden">
+        <div className="flex items-center gap-2 mb-4">
+          <Crown className="h-4 w-4 text-gold" strokeWidth={2} />
+          <h2 className="font-display text-lg leading-none">Path to Governor</h2>
+        </div>
+        <ul className="space-y-2">
+          {GOVERNOR_TASKS.map((t) => (
+            <li
+              key={t.label}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 border border-[rgba(201,168,76,0.15)] bg-white/[0.02]"
+            >
+              {t.done ? (
+                <CheckCircle2 className="h-4 w-4 text-gold fill-gold/20 shrink-0" strokeWidth={2} />
+              ) : (
+                <Circle className="h-4 w-4 text-foreground/35 shrink-0" strokeWidth={2} />
+              )}
+              <div className="min-w-0 flex-1">
+                <div className={`text-sm font-medium ${t.done ? "text-foreground" : "text-foreground/75"}`}>
+                  {t.label}
+                </div>
+                <div className="text-[11px] text-foreground/55 mt-0.5">{t.progress}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }

@@ -46,30 +46,30 @@
 :root {
   --radius: 0.875rem;
 
-  /* National Chamber — Navy / Gold / Crimson / Parchment */
-  --background: #0D1B3E;
+  /* National Chamber — Midnight Navy / Gold / Crimson / Parchment */
+  --background: #080F24;
   --foreground: #F4F1E8;
 
-  --navy-deep: #08122A;
-  --navy: #0D1B3E;
-  --navy-light: #16285A;
+  --navy-deep: #05091A;
+  --navy: #080F24;
+  --navy-light: #141F42;
 
-  --card: rgba(22, 40, 90, 0.65);
+  --card: #0E1A38;
   --card-foreground: #F4F1E8;
-  --popover: #0D1B3E;
+  --popover: #0E1A38;
   --popover-foreground: #F4F1E8;
 
   /* Gold prestige */
   --gold: #C9A84C;
   --gold-soft: #B8964A;
   --primary: #C9A84C;
-  --primary-foreground: #0D1B3E;
+  --primary-foreground: #080F24;
 
-  --secondary: #16285A;
+  --secondary: #141F42;
   --secondary-foreground: #F4F1E8;
-  --muted: #16285A;
+  --muted: #141F42;
   --muted-foreground: rgba(244, 241, 232, 0.6);
-  --accent: #1B3370;
+  --accent: #141F42;
   --accent-foreground: #F4F1E8;
 
   /* Live crimson */
@@ -96,8 +96,8 @@
   body {
     font-family: var(--font-sans);
     background-image:
-      radial-gradient(at 20% 0%, rgba(27, 51, 112, 0.55), transparent 60%),
-      radial-gradient(at 80% 100%, rgba(13, 27, 62, 0.85), transparent 60%);
+      radial-gradient(at 20% 0%, rgba(20, 31, 66, 0.55), transparent 60%),
+      radial-gradient(at 80% 100%, rgba(8, 15, 36, 0.85), transparent 60%);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
   }

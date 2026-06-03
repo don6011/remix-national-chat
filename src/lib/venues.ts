@@ -57,7 +57,7 @@ export const VENUES: Venue[] = [
     icon: Mic2,
     gradient: "from-[#3A1A40] via-[#241030] to-[#120820]",
     glow: "#C9A84C",
-    pinned: "On stage now: Austin singer-songwriters.",
+    pinned: "On stage now: local singer-songwriters.",
     cta: "Step into the spotlight",
   },
 ];

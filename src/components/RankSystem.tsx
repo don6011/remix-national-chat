@@ -11,13 +11,11 @@ type Rank = {
 };
 
 const CITIZEN_LADDER: Rank[] = [
-  { name: "Citizen",             requirement: "Account created",                  benefit: "Join any room" },
-  { name: "Verified Citizen",    requirement: "Profile completed",                benefit: "Custom badge" },
-  { name: "State Contributor",   requirement: "100 messages · 250 reactions",     benefit: "Profile flair" },
-  { name: "State Ambassador",    requirement: "500 messages · 1,000 reactions",   benefit: "Featured replies" },
-  { name: "Regional Ambassador", requirement: "Active in 3 states · 2,500 reactions", benefit: "Host rooms" },
-  { name: "National Voice",      requirement: "Top 10% nationally",               benefit: "Priority placement" },
-  { name: "American Legend",     requirement: "Invitation-only · Top contributors", benefit: "Legend profile frame" },
+  { name: "Citizen",          requirement: "Account created",                                       benefit: "Join any room" },
+  { name: "Verified Citizen", requirement: "Profile complete · State selected",                     benefit: "Custom badge" },
+  { name: "Resident",         requirement: "100 messages · 2 rooms visited",                        benefit: "Profile flair" },
+  { name: "State Ambassador", requirement: "300 messages · all 4 rooms visited · 25 reactions",     benefit: "Featured replies" },
+  { name: "Governor",         requirement: "Earned via Path to Governor · Elected by citizens",     benefit: "Run the state" },
 ];
 
 const HOST_LADDER: Rank[] = [
