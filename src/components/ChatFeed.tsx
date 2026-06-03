@@ -1,8 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Send, Sparkles } from "lucide-react";
+import { Send, Sparkles } from "lucide-react";
 import type { ChatMessage } from "@/lib/mockChat";
 import { useState } from "react";
 import { emitActivity } from "@/lib/activityBus";
+
+const REACTION_EMOJIS = ["🔥", "🇺🇸", "💬", "⚡", "❤️"];
 
 interface Props {
   messages: ChatMessage[];
@@ -15,25 +17,18 @@ interface Props {
   simpleHeader?: boolean;
   topic?: string;
   fixedInput?: boolean;
+  onSend?: (content: string) => void;
+  onReact?: (messageId: string, emoji: string, authorId: string) => void;
 }
 
-export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say something to the chamber…", accentGlow, stateId, venueId, simpleHeader, topic, fixedInput }: Props) {
+export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say something to the chamber…", accentGlow, stateId, venueId, simpleHeader, topic, fixedInput, onSend, onReact }: Props) {
   const [draft, setDraft] = useState("");
-  const [local, setLocal] = useState(messages);
 
   const send = () => {
     if (!draft.trim()) return;
-    setLocal([
-      ...local,
-      {
-        id: `me-${Date.now()}`,
-        user: "You",
-        state: "—",
-        status: "Citizen",
-        message: draft,
-        time: "now",
-      },
-    ]);
+    if (onSend) {
+      onSend(draft.trim());
+    }
     setDraft("");
     emitActivity({ type: "post", stateId, venueId });
   };
@@ -92,7 +87,7 @@ export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say somet
         style={accentGlow ? { boxShadow: `inset 0 -40px 80px -40px ${accentGlow}` } : undefined}
       >
         <AnimatePresence initial={false}>
-          {local.map((m) => (
+          {messages.map((m) => (
             <motion.div
               key={m.id}
               initial={{ opacity: 0, y: 8 }}
@@ -100,7 +95,7 @@ export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say somet
               className="flex gap-3"
             >
               <div className="h-9 w-9 rounded-full glass-gold flex items-center justify-center text-xs font-semibold text-gold shrink-0">
-                {m.user.slice(0, 1)}
+                {m.user.slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
@@ -114,22 +109,30 @@ export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say somet
                 <p className="text-[13.5px] leading-relaxed mt-0.5 text-foreground/95">
                   {m.message}
                 </p>
-                {m.reactions && (
-                  <div className="flex gap-1.5 mt-1.5">
-                    {m.reactions.map((r) => (
+                <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                  {REACTION_EMOJIS.map((emoji) => {
+                    const r = m.reactions?.find((rx) => rx.emoji === emoji);
+                    const count = r?.count ?? 0;
+                    const active = r?.userReacted ?? false;
+                    return (
                       <button
-                        key={r.emoji}
-                        onClick={() => emitActivity({ type: "reaction", stateId, venueId })}
-                        className="text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition"
+                        key={emoji}
+                        onClick={() => {
+                          if (onReact) onReact(m.id, emoji, m.authorId ?? "");
+                          emitActivity({ type: "reaction", stateId, venueId });
+                        }}
+                        className={[
+                          "text-[11px] px-2 py-0.5 rounded-full border transition",
+                          active
+                            ? "bg-gold/20 border-gold/40 text-gold"
+                            : "bg-white/5 border-white/10 hover:bg-white/10",
+                        ].join(" ")}
                       >
-                        {r.emoji} {r.count}
+                        {emoji}{count > 0 ? ` ${count}` : ""}
                       </button>
-                    ))}
-                    <button className="text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition">
-                      <Heart className="h-3 w-3" />
-                    </button>
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
               </div>
             </motion.div>
           ))}

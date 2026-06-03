@@ -5,7 +5,8 @@ export type ChatMessage = {
   status: string;
   message: string;
   time: string;
-  reactions?: { emoji: string; count: number }[];
+  reactions?: { emoji: string; count: number; userReacted?: boolean }[];
+  authorId?: string;
 };
 
 const NAMES = [
