@@ -356,3 +356,46 @@ function Lifetime({ k, v }: { k: string; v: string }) {
     </div>
   );
 }
+
+/* ---------- Path to Governor ---------- */
+
+const GOVERNOR_TASKS: { label: string; done: boolean; progress: string }[] = [
+  { label: "Messages",          done: true,  progress: "512 of 500 sent" },
+  { label: "Rooms Explored",    done: false, progress: "3 of 4 rooms visited (30m+)" },
+  { label: "Reactions Received", done: true,  progress: "84 of 50" },
+  { label: "Citizens Referred", done: false, progress: "1 of 3" },
+  { label: "Citizen Report Filed", done: false, progress: "No" },
+];
+
+function PathToGovernor() {
+  return (
+    <section>
+      <div className="glass-strong rounded-2xl p-5 relative overflow-hidden">
+        <div className="flex items-center gap-2 mb-4">
+          <Crown className="h-4 w-4 text-gold" strokeWidth={2} />
+          <h2 className="font-display text-lg leading-none">Path to Governor</h2>
+        </div>
+        <ul className="space-y-2">
+          {GOVERNOR_TASKS.map((t) => (
+            <li
+              key={t.label}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 border border-[rgba(201,168,76,0.15)] bg-white/[0.02]"
+            >
+              {t.done ? (
+                <CheckCircle2 className="h-4 w-4 text-gold fill-gold/20 shrink-0" strokeWidth={2} />
+              ) : (
+                <Circle className="h-4 w-4 text-foreground/35 shrink-0" strokeWidth={2} />
+              )}
+              <div className="min-w-0 flex-1">
+                <div className={`text-sm font-medium ${t.done ? "text-foreground" : "text-foreground/75"}`}>
+                  {t.label}
+                </div>
+                <div className="text-[11px] text-foreground/55 mt-0.5">{t.progress}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
