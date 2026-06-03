@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const ITEMS = [
-  { icon: "🔥", text: "Texas Sports Bar surging" },
-  { icon: "🎵", text: "Mississippi Blues Room +38%" },
-  { icon: "🏖", text: "Florida Beach Debate trending" },
-  { icon: "🎬", text: "California Creator District packed" },
+  { icon: "🏛", text: "Texas Town Hall surging" },
+  { icon: "🎸", text: "Mississippi Local Stage +38%" },
+  { icon: "🏛", text: "Florida Town Hall trending" },
+  { icon: "🎤", text: "California Local Stage packed" },
   { icon: "🎸", text: "Tennessee Local Stage buzzing" },
-  { icon: "💼", text: "New York Business District rising" },
+  { icon: "☕", text: "New York Coffee Shop rising" },
 ];
 
 export function LivePulseStrip() {

@@ -15,7 +15,7 @@ type PulseItem = {
 const SEED: Omit<PulseItem, "id">[] = [
   { kind: "arrival", icon: "🔥", text: "LoneStarMaya walked in", sub: "from Austin" },
   { kind: "topic", icon: "🏈", text: "Cowboys vs Eagles exploding", sub: "+412 replies / 5 min" },
-  { kind: "milestone", icon: "⚡", text: "Sports Bar hit record attendance", sub: "1,842 inside" },
+  { kind: "milestone", icon: "⚡", text: "Town Hall hit record attendance", sub: "1,842 inside" },
   { kind: "action", icon: "🎤", text: "SportsHost went live", sub: "412 listening" },
   { kind: "achievement", icon: "🏆", text: "TailgateKing earned Game Night Legend", sub: "just now" },
   { kind: "arrival", icon: "🤠", text: "14 citizens joined from Dallas", sub: "tailgate convoy" },
