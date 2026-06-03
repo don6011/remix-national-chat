@@ -1,8 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Flame, Trophy, Vote, MessageCircle, Crown, Shield, Star } from "lucide-react";
 
 export const Route = createFileRoute("/explore")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/login" });
+  },
   head: () => ({
     meta: [
       { title: "Explore — National Chamber" },

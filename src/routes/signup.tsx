@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, createFileRoute } from "@tanstack/react-router";
-import { Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Mail, Lock, User, AtSign, MapPin, ArrowRight, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthShell, Field, ErrorMsg } from "./login";
 
@@ -9,9 +9,13 @@ export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
 
+const HOME_STATES = ["Texas", "Florida", "Mississippi", "Tennessee", "California"];
+
 function SignupPage() {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
+  const [homeState, setHomeState] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,12 +25,11 @@ function SignupPage() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
+    if (!homeState) { setError("Please select your home state."); return; }
+    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     setBusy(true);
-    const { error, data } = await supabase.auth.signUp({
+
+    const { error: signUpError, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -34,8 +37,32 @@ function SignupPage() {
         data: { display_name: displayName },
       },
     });
+
+    if (signUpError) { setBusy(false); setError(signUpError.message); return; }
+
+    // Insert user row immediately on signup
+    if (data.user) {
+      const userId = data.user.id;
+
+      // Count existing users to determine founding citizen status
+      const { count } = await supabase
+        .from("users")
+        .select("*", { count: "exact", head: true });
+
+      const isFoundingCitizen = (count ?? 0) < 1000;
+
+      await supabase.from("users").upsert({
+        id: userId,
+        username: username.trim().toLowerCase().replace(/\s/g, ""),
+        email,
+        display_name: displayName.trim() || null,
+        home_state: homeState,
+        is_founding_citizen: isFoundingCitizen,
+        onboarded: false,
+      });
+    }
+
     setBusy(false);
-    if (error) { setError(error.message); return; }
     if (data.session) {
       navigate({ to: "/onboarding", replace: true });
     } else {
@@ -57,12 +84,30 @@ function SignupPage() {
   }
 
   return (
-    <AuthShell title="Join the Chamber" subtitle="Become a Citizen of National Chamber.">
+    <AuthShell title="Join the Chamber" subtitle="Become a Citizen of National Chat.">
       <form onSubmit={onSubmit} className="space-y-4">
         <Field label="Display name" icon={User}>
           <input required value={displayName} onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full bg-transparent text-sm focus:outline-none" placeholder="Your name" />
+            className="w-full bg-transparent text-sm focus:outline-none" placeholder="Your full name" />
         </Field>
+        <Field label="Username" icon={AtSign}>
+          <input required value={username} onChange={(e) => setUsername(e.target.value.replace(/\s/g, ""))}
+            className="w-full bg-transparent text-sm focus:outline-none" placeholder="no spaces" />
+        </Field>
+        <label className="block">
+          <div className="text-[11px] uppercase tracking-wider text-foreground/60 mb-1.5">Home State</div>
+          <div className="flex items-center gap-2 glass rounded-xl px-3 py-2.5 border border-white/10 focus-within:border-gold/40">
+            <MapPin className="h-4 w-4 text-gold/80 shrink-0" strokeWidth={2} />
+            <select required value={homeState} onChange={(e) => setHomeState(e.target.value)}
+              className="w-full bg-transparent text-sm focus:outline-none appearance-none cursor-pointer text-foreground">
+              <option value="" disabled className="bg-[#080F24]">Select your state…</option>
+              {HOME_STATES.map((s) => (
+                <option key={s} value={s} className="bg-[#080F24]">{s}</option>
+              ))}
+            </select>
+            <ChevronDown className="h-4 w-4 text-gold/60 shrink-0" strokeWidth={2} />
+          </div>
+        </label>
         <Field label="Email" icon={Mail}>
           <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)}
             className="w-full bg-transparent text-sm focus:outline-none" placeholder="you@example.com" />
@@ -75,7 +120,7 @@ function SignupPage() {
         {error ? <ErrorMsg>{error}</ErrorMsg> : null}
         <button type="submit" disabled={busy}
           className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 bg-gradient-to-r from-gold to-amber-500 text-[var(--navy-deep)] font-display text-sm uppercase tracking-wider disabled:opacity-50">
-          {busy ? "Creating…" : "Create account"} <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+          {busy ? "Creating…" : "Become a Citizen"} <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
         </button>
       </form>
       <div className="mt-6 text-center text-[11px] text-foreground/70">

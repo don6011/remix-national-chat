@@ -528,6 +528,72 @@ export type Database = {
         }
         Relationships: []
       }
+      users: {
+        Row: {
+          id: string
+          username: string
+          email: string
+          home_state: string
+          display_name: string | null
+          rank: string | null
+          influence_points: number | null
+          messages_sent: number | null
+          reactions_received: number | null
+          referrals_count: number | null
+          citizen_report_filed: boolean | null
+          streak_days: number | null
+          last_active: string | null
+          is_founding_citizen: boolean | null
+          is_patriot_plus: boolean | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          onboarded: boolean
+        }
+        Insert: {
+          id: string
+          username: string
+          email: string
+          home_state: string
+          display_name?: string | null
+          rank?: string | null
+          influence_points?: number | null
+          messages_sent?: number | null
+          reactions_received?: number | null
+          referrals_count?: number | null
+          citizen_report_filed?: boolean | null
+          streak_days?: number | null
+          last_active?: string | null
+          is_founding_citizen?: boolean | null
+          is_patriot_plus?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          onboarded?: boolean
+        }
+        Update: {
+          id?: string
+          username?: string
+          email?: string
+          home_state?: string
+          display_name?: string | null
+          rank?: string | null
+          influence_points?: number | null
+          messages_sent?: number | null
+          reactions_received?: number | null
+          referrals_count?: number | null
+          citizen_report_filed?: boolean | null
+          streak_days?: number | null
+          last_active?: string | null
+          is_founding_citizen?: boolean | null
+          is_patriot_plus?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          onboarded?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

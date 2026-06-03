@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
@@ -18,6 +19,10 @@ import { STATES } from "@/lib/states";
 import { getVenue } from "@/lib/venues";
 
 export const Route = createFileRoute("/live")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/login" });
+  },
   head: () => ({
     meta: [
       { title: "Live — America is alive right now" },

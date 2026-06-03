@@ -35,9 +35,9 @@ function LoginPage() {
     // Route new users through onboarding
     let dest = redirect ?? "/";
     if (data.user) {
-      const { data: prof } = await supabase
-        .from("profiles").select("onboarded").eq("user_id", data.user.id).maybeSingle();
-      if (prof && !prof.onboarded) dest = "/onboarding";
+      const { data: appUser } = await supabase
+        .from("users").select("onboarded").eq("id", data.user.id).maybeSingle();
+      if (!appUser || !appUser.onboarded) dest = "/onboarding";
     }
     setBusy(false);
     navigate({ to: dest, replace: true });

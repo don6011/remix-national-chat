@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { useMemo } from "react";
 import { Heart } from "lucide-react";
 import { StateCard } from "@/components/StateCard";
@@ -6,6 +7,10 @@ import { STATES } from "@/lib/states";
 import { useFavoriteStates } from "@/hooks/use-favorites";
 
 export const Route = createFileRoute("/states/")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/login" });
+  },
   head: () => ({
     meta: [
       { title: "States — National Chat" },
