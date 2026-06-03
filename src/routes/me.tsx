@@ -3,12 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { motion } from "framer-motion";
 import { STATES } from "@/lib/states";
-import { VENUES } from "@/lib/venues";
 import { RankSystem } from "@/components/RankSystem";
 import {
-  Shield, MapPin, Award, Sparkles, Flame, Trophy, Mic2,
-  MessageSquare, Hash, Heart, Users, Clock, Compass, CheckCircle2,
-  Circle, Crown, LogOut, LogIn,
+  Shield, MapPin, Circle, Crown, CheckCircle2, LogOut, LogIn,
 } from "lucide-react";
 
 export const Route = createFileRoute("/me")({
@@ -19,85 +16,39 @@ export const Route = createFileRoute("/me")({
   head: () => ({
     meta: [
       { title: "Citizen Passport — National Chat" },
-      { name: "description", content: "Your citizen passport: influence, achievements, journey across America." },
+      { name: "description", content: "Your citizen passport: influence, rank, and path to Governor." },
     ],
   }),
   component: Me,
 });
 
-
-const STATS = [
-  { icon: MessageSquare, label: "Messages", value: "12,847" },
-  { icon: Hash, label: "Topics", value: "44" },
-  { icon: Heart, label: "Reactions", value: "12,847" },
-  { icon: Users, label: "Rooms Joined", value: "22" },
-  { icon: Clock, label: "Hours Active", value: "318" },
-  { icon: Compass, label: "States Visited", value: "17" },
-];
-
-const TIMELINE = [
-  { date: "Jan 2026", label: "Joined Texas", icon: "🤠" },
-  { date: "Jan 2026", label: "Earned Founding Citizen", icon: "🏛️" },
-  { date: "Feb 2026", label: "Started First Debate", icon: "💬" },
-  { date: "Mar 2026", label: "Reached State Contributor", icon: "⭐" },
-  { date: "Apr 2026", label: "Reached Ambassador", icon: "🛡️" },
-  { date: "May 2026", label: "Visited Mississippi", icon: "🎷" },
-  { date: "Jun 2026", label: "Hosted First Room", icon: "🎤" },
-];
-
-const RARITY: Record<string, { label: string; cls: string }> = {
-  legendary: { label: "Legendary", cls: "text-fuchsia-300 border-fuchsia-400/40 bg-fuchsia-400/10" },
-  epic:      { label: "Epic",      cls: "text-amber-300 border-amber-400/40 bg-amber-400/10" },
-  rare:      { label: "Rare",      cls: "text-sky-300 border-sky-400/40 bg-sky-400/10" },
-  common:    { label: "Common",    cls: "text-foreground/70 border-white/15 bg-white/5" },
-};
-
-const BADGES = [
-  { emoji: "🏛️", title: "Founding Citizen",   desc: "Among the first 1,000 citizens",   date: "Jan 2026", rarity: "legendary" },
-  { emoji: "⭐",  title: "Top 5% Contributor", desc: "Ranked in top 5% nationally",      date: "May 2026", rarity: "epic" },
-  { emoji: "🍺", title: "Roadhouse Regular",   desc: "100+ posts in Texas Roadhouse Bar", date: "Mar 2026", rarity: "epic" },
-  { emoji: "📣", title: "Town Hall Voice",    desc: "Hosted a verified debate",          date: "Jun 2026", rarity: "rare" },
-  { emoji: "☕", title: "Creator Supporter",  desc: "Backed 10+ creators",               date: "Apr 2026", rarity: "rare" },
-  { emoji: "🧳", title: "State Traveler",     desc: "Visited 15+ states",                date: "May 2026", rarity: "rare" },
-  { emoji: "🎤", title: "Open Mic Night",     desc: "Performed in Local Stage",          date: "Feb 2026", rarity: "common" },
-  { emoji: "🇺🇸", title: "Early Adopter",      desc: "Joined in launch week",             date: "Jan 2026", rarity: "epic" },
-];
-
-const ROOM_LEGENDS = [
-  { room: "Texas Town Hall",         state: "Texas",       rank: "Top 10 contributor",  glow: "oklch(0.78 0.16 60)" },
-  { room: "Mississippi Local Stage", state: "Mississippi", rank: "Top 25 contributor",  glow: "oklch(0.62 0.18 290)" },
-  { room: "Florida Town Hall",       state: "Florida",     rank: "Verified Voice",       glow: "oklch(0.78 0.14 200)" },
-];
-
-const FAVORITE_SPACES = [
-  { id: "town-hall",   name: "Town Hall",   visits: 124, time: "92h", last: "2h ago" },
-  { id: "bar",         name: "The Bar",     visits: 92,  time: "63h", last: "5h ago" },
-  { id: "coffee-shop", name: "Coffee Shop", visits: 82,  time: "54h", last: "1d ago" },
-  { id: "local-stage", name: "Local Stage", visits: 53,  time: "31h", last: "3d ago" },
+const GOVERNOR_TASKS: { label: string; done: boolean; progress: string }[] = [
+  { label: "Messages",             done: true,  progress: "512 of 500 sent" },
+  { label: "Rooms Explored",       done: false, progress: "3 of 4 rooms visited (30m+)" },
+  { label: "Reactions Received",   done: true,  progress: "84 of 50" },
+  { label: "Citizens Referred",    done: false, progress: "1 of 3" },
+  { label: "Citizen Report Filed", done: false, progress: "No" },
 ];
 
 function Me() {
   const navigate = useNavigate();
   const { isAuthenticated, loading } = useAuth();
   const home = STATES.find((s) => s.id === "texas") ?? STATES[0];
-  const favoriteVenues = FAVORITE_SPACES.map((f) => ({
-    ...f,
-    venue: VENUES.find((v) => v.id === f.id) ?? VENUES[0],
-  }));
 
   async function handleSignOut() {
     await supabase.auth.signOut();
     navigate({ to: "/login", replace: true });
   }
 
-  // Fallback: if session expired client-side after mount
   if (!loading && !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center px-5" style={{ background: "#080F24" }}>
         <div className="text-center space-y-4">
           <LogIn className="h-10 w-10 text-gold mx-auto" strokeWidth={1.5} />
           <h2 className="font-display text-2xl" style={{ color: "#F4F1E8" }}>Sign in to view your passport</h2>
-          <p className="text-sm" style={{ color: "rgba(244,241,232,0.55)" }}>Your Citizen Passport is only visible when you're logged in.</p>
+          <p className="text-sm" style={{ color: "rgba(244,241,232,0.55)" }}>
+            Your Citizen Passport is only visible when you're logged in.
+          </p>
           <Link
             to="/login"
             className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm uppercase tracking-wider"
@@ -112,7 +63,7 @@ function Me() {
 
   return (
     <div className="relative pb-16">
-      {/* HERO — CITIZEN PASSPORT */}
+      {/* CITIZEN PASSPORT CARD */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#080F24] via-[#0E1A38] to-transparent" />
         <div className="absolute inset-0 particles" />
@@ -177,267 +128,40 @@ function Me() {
         </div>
       </section>
 
-      <main className="max-w-2xl mx-auto px-5 space-y-8">
+      <main className="max-w-2xl mx-auto px-5 space-y-6 pb-8">
+        {/* CURRENT RANK + LADDER */}
         <RankSystem />
 
-        <PathToGovernor />
-
-
-        {/* CITIZEN IDENTITY */}
+        {/* PATH TO GOVERNOR */}
         <section>
-          <SectionTitle icon={Shield} title="Citizen Identity" />
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { k: "Home State",        v: "Texas",            sub: "Lone Star" },
-              { k: "Current State",     v: "Mississippi",      sub: "Visiting" },
-              { k: "Citizen Rank",      v: "Ambassador",       sub: "Tier IV" },
-              { k: "Host Status",       v: "Verified",         sub: "Since Jun 2026", icon: CheckCircle2 },
-              { k: "Contributor Level", v: "Top 5%",           sub: "National" },
-              { k: "Verified Citizen",  v: "Yes",              sub: "ID Confirmed", icon: CheckCircle2 },
-            ].map((c) => (
-              <div key={c.k} className="glass rounded-xl p-3">
-                <div className="text-[10px] uppercase tracking-widest text-foreground/50">{c.k}</div>
-                <div className="mt-1 text-sm font-medium flex items-center gap-1">
-                  {c.v}
-                  {c.icon && <c.icon className="h-3.5 w-3.5 text-emerald-300" />}
-                </div>
-                <div className="text-[10px] text-foreground/50 mt-0.5">{c.sub}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* CITIZEN STATS */}
-        <section>
-          <SectionTitle icon={Sparkles} title="Citizen Stats" />
-          <div className="grid grid-cols-3 gap-2">
-            {STATS.map((s) => (
-              <div key={s.label} className="glass rounded-xl p-3 text-center">
-                <s.icon className="h-4 w-4 text-gold mx-auto" strokeWidth={1.75} />
-                <div className="mt-1.5 font-display text-lg tabular-nums">{s.value}</div>
-                <div className="text-[10px] uppercase tracking-widest text-foreground/55">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* PASSPORT TIMELINE */}
-        <section>
-          <SectionTitle icon={Clock} title="Passport Timeline" />
-          <div className="relative pl-5">
-            <div className="absolute left-1.5 top-1 bottom-1 w-px bg-gradient-to-b from-gold/40 via-white/10 to-transparent" />
-            <ol className="space-y-3">
-              {TIMELINE.map((t, i) => (
-                <motion.li
+          <div className="glass-strong rounded-2xl p-5 relative overflow-hidden">
+            <div className="flex items-center gap-2 mb-4">
+              <Crown className="h-4 w-4 text-gold" strokeWidth={2} />
+              <h2 className="font-display text-lg leading-none">Path to Governor</h2>
+            </div>
+            <ul className="space-y-2">
+              {GOVERNOR_TASKS.map((t) => (
+                <li
                   key={t.label}
-                  initial={{ opacity: 0, x: -6 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.04 }}
-                  className="relative"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 border border-[rgba(201,168,76,0.15)] bg-white/[0.02]"
                 >
-                  <span className="absolute -left-[18px] top-2 h-3 w-3 rounded-full bg-gold shadow-[0_0_12px_oklch(0.78_0.16_60)]" />
-                  <div className="glass rounded-xl p-3 flex items-center gap-3">
-                    <div className="text-lg">{t.icon}</div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm">{t.label}</div>
-                      <div className="text-[10px] uppercase tracking-widest text-foreground/50">{t.date}</div>
+                  {t.done ? (
+                    <CheckCircle2 className="h-4 w-4 text-gold fill-gold/20 shrink-0" strokeWidth={2} />
+                  ) : (
+                    <Circle className="h-4 w-4 text-foreground/35 shrink-0" strokeWidth={2} />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className={`text-sm font-medium ${t.done ? "text-foreground" : "text-foreground/75"}`}>
+                      {t.label}
                     </div>
+                    <div className="text-[11px] text-foreground/55 mt-0.5">{t.progress}</div>
                   </div>
-                </motion.li>
+                </li>
               ))}
-            </ol>
-          </div>
-        </section>
-
-        {/* BADGES 2.0 */}
-        <section>
-          <SectionTitle icon={Award} title="Achievements" />
-          <div className="grid grid-cols-2 gap-2">
-            {BADGES.map((b) => {
-              const r = RARITY[b.rarity];
-              return (
-                <div key={b.title} className={`glass rounded-xl p-3 border ${r.cls.split(" ").slice(1).join(" ")}`}>
-                  <div className="flex items-start justify-between">
-                    <div className="text-2xl">{b.emoji}</div>
-                    <span className={`text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded border ${r.cls}`}>
-                      {r.label}
-                    </span>
-                  </div>
-                  <div className="mt-2 text-sm font-medium">{b.title}</div>
-                  <div className="text-[11px] text-foreground/60 mt-0.5 leading-snug">{b.desc}</div>
-                  <div className="text-[10px] text-foreground/45 mt-1.5 uppercase tracking-widest">{b.date}</div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* STATE JOURNEY */}
-        <section>
-          <SectionTitle icon={Compass} title="State Journey" />
-          <div className="glass-strong rounded-2xl p-5">
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div>
-                <div className="font-display text-2xl text-gold tabular-nums">17</div>
-                <div className="text-[10px] uppercase tracking-widest text-foreground/55">Visited</div>
-              </div>
-              <div>
-                <div className="font-display text-2xl text-gold tabular-nums">6</div>
-                <div className="text-[10px] uppercase tracking-widest text-foreground/55">Active In</div>
-              </div>
-              <div>
-                <div className="font-display text-2xl text-gold tabular-nums">🤠</div>
-                <div className="text-[10px] uppercase tracking-widest text-foreground/55">Most Active</div>
-              </div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-white/10 text-xs text-foreground/70">
-              Favorite room: <span className="text-foreground">Mississippi Blues Room 🎷</span>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {STATES.map((s) => (
-                <Link
-                  key={s.id}
-                  to="/states/$stateId"
-                  params={{ stateId: s.id }}
-                  className="glass rounded-full px-2.5 py-1 text-[11px] flex items-center gap-1 hover:bg-white/10 transition"
-                >
-                  <span>{s.emoji}</span> {s.abbr}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ROOM LEGENDS */}
-        <section>
-          <SectionTitle icon={Trophy} title="Room Legends" />
-          <div className="space-y-2">
-            {ROOM_LEGENDS.map((r) => (
-              <div key={r.room} className="glass rounded-xl p-3 flex items-center gap-3 relative overflow-hidden">
-                <div
-                  className="absolute -left-6 top-1/2 -translate-y-1/2 h-20 w-20 rounded-full blur-3xl opacity-50"
-                  style={{ background: r.glow }}
-                />
-                <div className="relative h-10 w-10 rounded-xl glass-gold flex items-center justify-center">
-                  <Flame className="h-4 w-4 text-gold" />
-                </div>
-                <div className="relative flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">{r.room}</div>
-                  <div className="text-[11px] text-foreground/55">{r.state}</div>
-                </div>
-                <div className="relative text-[10px] uppercase tracking-widest text-gold/90 text-right">
-                  {r.rank}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* FAVORITE SPACES */}
-        <section>
-          <SectionTitle icon={Mic2} title="Favorite Spaces" />
-          <div className="space-y-2">
-            {favoriteVenues.map(({ venue, ...f }) => {
-              const Icon = venue.icon;
-              return (
-                <div key={f.id} className="glass rounded-xl p-3 flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center">
-                    <Icon className="h-4 w-4 text-gold" strokeWidth={1.75} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium">{f.name}</div>
-                    <div className="text-[11px] text-foreground/55">
-                      {f.visits} visits · {f.time} · {f.last}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* END OF PROFILE — LIFETIME */}
-        <section className="glass-strong rounded-2xl p-5 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(60% 50% at 50% 0%, oklch(0.78 0.16 60 / 0.25), transparent)" }} />
-          <div className="relative">
-            <div className="text-center text-[10px] uppercase tracking-[0.3em] text-gold/80">
-              Lifetime
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-3 text-center">
-              <Lifetime k="Citizen No." v="000482" />
-              <Lifetime k="Member Since" v="Jan 2026" />
-              <Lifetime k="Reactions" v="12,847" />
-              <Lifetime k="Messages" v="38,412" />
-              <Lifetime k="Rooms Joined" v="22" />
-              <Lifetime k="Hours Active" v="318" />
-            </div>
-            <div className="mt-5 text-center text-[10px] uppercase tracking-[0.3em] text-foreground/40">
-              National Chat · Citizen Passport
-            </div>
+            </ul>
           </div>
         </section>
       </main>
     </div>
-  );
-}
-
-function SectionTitle({ icon: Icon, title }: { icon: typeof Shield; title: string }) {
-  return (
-    <h2 className="font-display text-lg mb-3 flex items-center gap-2">
-      <Icon className="h-4 w-4 text-gold" /> {title}
-    </h2>
-  );
-}
-
-function Lifetime({ k, v }: { k: string; v: string }) {
-  return (
-    <div>
-      <div className="font-display text-lg tabular-nums">{v}</div>
-      <div className="text-[10px] uppercase tracking-widest text-foreground/55">{k}</div>
-    </div>
-  );
-}
-
-/* ---------- Path to Governor ---------- */
-
-const GOVERNOR_TASKS: { label: string; done: boolean; progress: string }[] = [
-  { label: "Messages",          done: true,  progress: "512 of 500 sent" },
-  { label: "Rooms Explored",    done: false, progress: "3 of 4 rooms visited (30m+)" },
-  { label: "Reactions Received", done: true,  progress: "84 of 50" },
-  { label: "Citizens Referred", done: false, progress: "1 of 3" },
-  { label: "Citizen Report Filed", done: false, progress: "No" },
-];
-
-function PathToGovernor() {
-  return (
-    <section>
-      <div className="glass-strong rounded-2xl p-5 relative overflow-hidden">
-        <div className="flex items-center gap-2 mb-4">
-          <Crown className="h-4 w-4 text-gold" strokeWidth={2} />
-          <h2 className="font-display text-lg leading-none">Path to Governor</h2>
-        </div>
-        <ul className="space-y-2">
-          {GOVERNOR_TASKS.map((t) => (
-            <li
-              key={t.label}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 border border-[rgba(201,168,76,0.15)] bg-white/[0.02]"
-            >
-              {t.done ? (
-                <CheckCircle2 className="h-4 w-4 text-gold fill-gold/20 shrink-0" strokeWidth={2} />
-              ) : (
-                <Circle className="h-4 w-4 text-foreground/35 shrink-0" strokeWidth={2} />
-              )}
-              <div className="min-w-0 flex-1">
-                <div className={`text-sm font-medium ${t.done ? "text-foreground" : "text-foreground/75"}`}>
-                  {t.label}
-                </div>
-                <div className="text-[11px] text-foreground/55 mt-0.5">{t.progress}</div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
   );
 }
