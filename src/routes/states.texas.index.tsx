@@ -36,7 +36,7 @@ const PULSE_FEED = [
   { emoji: "🍺", text: "The Roadhouse Bar reached PACKED status" },
   { emoji: "🤠", text: "37 new citizens just arrived from Austin" },
   { emoji: "🏆", text: "Texas moved to #1 nationally tonight" },
-  { emoji: "🎸", text: "Nashville stage is challenging Austin Local Stage" },
+  { emoji: "🎸", text: "Nashville stage is challenging Texas Local Stage" },
   { emoji: "🏛", text: "Town Hall: housing proposal hit 1,400 votes" },
   { emoji: "🍺", text: "BBQ war exploding at The Bar — Franklin vs Snow's" },
   { emoji: "☕", text: "Hill Country Coffee Shop trending: career pivots" },
