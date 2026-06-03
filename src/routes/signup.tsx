@@ -34,33 +34,18 @@ function SignupPage() {
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { display_name: displayName },
+        // Pass fields through metadata — the DB trigger reads these to populate public.users
+        data: {
+          username: username.trim().toLowerCase().replace(/\s/g, ""),
+          display_name: displayName.trim() || null,
+          home_state: homeState,
+        },
       },
     });
 
     if (signUpError) { setBusy(false); setError(signUpError.message); return; }
-
-    // Insert user row immediately on signup
-    if (data.user) {
-      const userId = data.user.id;
-
-      // Count existing users to determine founding citizen status
-      const { count } = await supabase
-        .from("users")
-        .select("*", { count: "exact", head: true });
-
-      const isFoundingCitizen = (count ?? 0) < 1000;
-
-      await supabase.from("users").upsert({
-        id: userId,
-        username: username.trim().toLowerCase().replace(/\s/g, ""),
-        email,
-        display_name: displayName.trim() || null,
-        home_state: homeState,
-        is_founding_citizen: isFoundingCitizen,
-        onboarded: false,
-      });
-    }
+    // No manual insert needed — a Postgres trigger on auth.users automatically
+    // creates the public.users row with SECURITY DEFINER, bypassing RLS.
 
     setBusy(false);
     if (data.session) {
