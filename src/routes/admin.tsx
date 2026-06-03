@@ -6,8 +6,8 @@ import {
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async ({ location }) => {
-    const { data: u, error } = await supabase.auth.getUser();
-    if (error || !u.user) throw redirect({ to: "/login", search: { redirect: location.href } });
+    const { data: u } = await supabase.auth.getSession();
+    if (!u.session) throw redirect({ to: "/login", search: { redirect: location.href } });
     // Admin role check — reserved for future use
     throw redirect({ to: "/" });
   },

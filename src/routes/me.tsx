@@ -1,5 +1,6 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { motion } from "framer-motion";
 import { STATES } from "@/lib/states";
 import { VENUES } from "@/lib/venues";
@@ -7,13 +8,13 @@ import { RankSystem } from "@/components/RankSystem";
 import {
   Shield, MapPin, Award, Sparkles, Flame, Trophy, Mic2,
   MessageSquare, Hash, Heart, Users, Clock, Compass, CheckCircle2,
-  Circle, Crown,
+  Circle, Crown, LogOut, LogIn,
 } from "lucide-react";
 
 export const Route = createFileRoute("/me")({
   beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/login" });
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/login" });
   },
   head: () => ({
     meta: [
@@ -76,12 +77,38 @@ const FAVORITE_SPACES = [
 ];
 
 function Me() {
+  const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
   const home = STATES.find((s) => s.id === "texas") ?? STATES[0];
   const favoriteVenues = FAVORITE_SPACES.map((f) => ({
     ...f,
     venue: VENUES.find((v) => v.id === f.id) ?? VENUES[0],
   }));
-  
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    navigate({ to: "/login", replace: true });
+  }
+
+  // Fallback: if session expired client-side after mount
+  if (!loading && !isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-5" style={{ background: "#080F24" }}>
+        <div className="text-center space-y-4">
+          <LogIn className="h-10 w-10 text-gold mx-auto" strokeWidth={1.5} />
+          <h2 className="font-display text-2xl" style={{ color: "#F4F1E8" }}>Sign in to view your passport</h2>
+          <p className="text-sm" style={{ color: "rgba(244,241,232,0.55)" }}>Your Citizen Passport is only visible when you're logged in.</p>
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm uppercase tracking-wider"
+            style={{ background: "linear-gradient(135deg, #C9A84C, #d4a017)", color: "#080F24", fontFamily: "Georgia, serif" }}
+          >
+            Sign in <LogIn className="h-4 w-4" strokeWidth={2.5} />
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative pb-16">
@@ -105,11 +132,21 @@ function Me() {
             />
             <div className="relative flex items-center justify-between">
               <div className="section-label">Citizen Passport</div>
-              <div
-                className="text-gold tabular-nums font-semibold tracking-[0.2em] text-sm"
-                style={{ fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}
-              >
-                No. 000482
+              <div className="flex items-center gap-3">
+                <div
+                  className="text-gold tabular-nums font-semibold tracking-[0.2em] text-sm"
+                  style={{ fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}
+                >
+                  No. 000482
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-foreground/50 hover:text-rose-300 transition"
+                  title="Sign out"
+                >
+                  <LogOut className="h-3.5 w-3.5" strokeWidth={2} />
+                  Sign out
+                </button>
               </div>
             </div>
 
