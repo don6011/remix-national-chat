@@ -14,9 +14,10 @@ interface Props {
   venueId?: string;
   simpleHeader?: boolean;
   topic?: string;
+  fixedInput?: boolean;
 }
 
-export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say something to the chamber…", accentGlow, stateId, venueId, simpleHeader, topic }: Props) {
+export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say something to the chamber…", accentGlow, stateId, venueId, simpleHeader, topic, fixedInput }: Props) {
   const [draft, setDraft] = useState("");
   const [local, setLocal] = useState(messages);
 
