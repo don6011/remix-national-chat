@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import {
-  Shield, Crown, Star, Zap, Check, Lock, Mic2, Sparkles,
+  Shield, Crown, Star, Zap, Check, Lock, Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -18,20 +18,8 @@ const CITIZEN_LADDER: Rank[] = [
   { name: "Governor",         requirement: "Earned via Path to Governor · Elected by citizens",     benefit: "Run the state" },
 ];
 
-const HOST_LADDER: Rank[] = [
-  { name: "Host",               requirement: "Host your first room",           benefit: "Host tools unlocked" },
-  { name: "Room Leader",        requirement: "10 rooms hosted",                benefit: "Room customization" },
-  { name: "Community Builder",  requirement: "500 listeners reached",          benefit: "Pinned announcements" },
-  { name: "State Host",         requirement: "Top 10 host in your state",      benefit: "State-wide promotion" },
-  { name: "Regional Host",      requirement: "Top host across 3 states",       benefit: "Multi-state takeover" },
-  { name: "National Host",      requirement: "Top 25 nationally",              benefit: "Featured on Live tab" },
-  { name: "Legendary Host",     requirement: "Invitation-only · Iconic hosts", benefit: "Legendary host frame" },
-];
-
 const CITIZEN_INDEX = 3;   // State Ambassador
-const HOST_INDEX = 1;      // Room Leader
 const CITIZEN_PCT = 82;
-const HOST_PCT = 41;
 const INFLUENCE = 1428;
 
 export function RankSystem() {
@@ -71,7 +59,7 @@ export function RankSystem() {
         </div>
       </div>
 
-      {/* TWO LADDERS */}
+      {/* CITIZEN LADDER */}
       <div className="grid gap-4">
         <Ladder
           title="Citizen Rank"
@@ -80,14 +68,6 @@ export function RankSystem() {
           ranks={CITIZEN_LADDER}
           currentIndex={CITIZEN_INDEX}
           pct={CITIZEN_PCT}
-        />
-        <Ladder
-          title="Host Rank"
-          subtitle="Creators"
-          icon={Mic2}
-          ranks={HOST_LADDER}
-          currentIndex={HOST_INDEX}
-          pct={HOST_PCT}
         />
       </div>
     </section>
