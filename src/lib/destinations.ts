@@ -24,7 +24,7 @@ const OVERRIDES: Record<string, Partial<Destination>[]> = {
     { id: "town-hall", name: "Lone Star Town Hall", inside: 1205, blurb: "Election season heating up." },
     { id: "bar", name: "The Roadhouse Bar", inside: 731, blurb: "Jokes, memes, late-night Texas energy." },
     { id: "coffee-shop", name: "Hill Country Coffee Shop", inside: 964, blurb: "Slow conversations and life advice." },
-    { id: "local-stage", name: "Austin Local Stage", inside: 602, blurb: "Unsigned artists performing live." },
+    { id: "local-stage", name: "Texas Local Stage", inside: 602, blurb: "Unsigned artists performing live." },
   ],
   mississippi: [
     { id: "town-hall", name: "Mississippi Town Hall", inside: 318, blurb: "Delta voices on local matters." },
