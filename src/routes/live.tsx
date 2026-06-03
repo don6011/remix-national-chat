@@ -54,9 +54,9 @@ const NATIONAL_STATS = [
 ];
 
 const HOT_ROOMS = [
-  { stateId: "texas",      venueId: "sports-bar",        topic: "Cowboys vs Eagles exploding",   live: 5124 },
-  { stateId: "florida",    venueId: "town-hall",         topic: "Best beach in Florida?",        live: 4448 },
-  { stateId: "california", venueId: "business-district", topic: "LA vs SF creator war",          live: 3912 },
+  { stateId: "texas",      venueId: "bar",         topic: "Cowboys vs Eagles exploding",   live: 5124 },
+  { stateId: "florida",    venueId: "town-hall",   topic: "Best beach in Florida?",        live: 4448 },
+  { stateId: "california", venueId: "local-stage", topic: "LA vs SF creator war",          live: 3912 },
 ];
 
 const STATE_INTEL = [
