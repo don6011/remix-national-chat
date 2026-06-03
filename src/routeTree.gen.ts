@@ -30,8 +30,6 @@ import { Route as AdminModerationRouteImport } from './routes/admin.moderation'
 import { Route as AdminLiveFeedRouteImport } from './routes/admin.live-feed'
 import { Route as StatesTexasIndexRouteImport } from './routes/states.texas.index'
 import { Route as StatesStateIdIndexRouteImport } from './routes/states.$stateId.index'
-import { Route as StatesTexasSportsBarRouteImport } from './routes/states.texas.sports-bar'
-import { Route as StatesTexasBarRouteImport } from './routes/states.texas.bar'
 import { Route as StatesStateIdVenueIdRouteImport } from './routes/states.$stateId.$venueId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -139,16 +137,6 @@ const StatesStateIdIndexRoute = StatesStateIdIndexRouteImport.update({
   path: '/states/$stateId/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StatesTexasSportsBarRoute = StatesTexasSportsBarRouteImport.update({
-  id: '/states/texas/sports-bar',
-  path: '/states/texas/sports-bar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StatesTexasBarRoute = StatesTexasBarRouteImport.update({
-  id: '/states/texas/bar',
-  path: '/states/texas/bar',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const StatesStateIdVenueIdRoute = StatesStateIdVenueIdRouteImport.update({
   id: '/states/$stateId/$venueId',
   path: '/states/$stateId/$venueId',
@@ -176,8 +164,6 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/states/': typeof StatesIndexRoute
   '/states/$stateId/$venueId': typeof StatesStateIdVenueIdRoute
-  '/states/texas/bar': typeof StatesTexasBarRoute
-  '/states/texas/sports-bar': typeof StatesTexasSportsBarRoute
   '/states/$stateId/': typeof StatesStateIdIndexRoute
   '/states/texas/': typeof StatesTexasIndexRoute
 }
@@ -201,8 +187,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/states': typeof StatesIndexRoute
   '/states/$stateId/$venueId': typeof StatesStateIdVenueIdRoute
-  '/states/texas/bar': typeof StatesTexasBarRoute
-  '/states/texas/sports-bar': typeof StatesTexasSportsBarRoute
   '/states/$stateId': typeof StatesStateIdIndexRoute
   '/states/texas': typeof StatesTexasIndexRoute
 }
@@ -228,8 +212,6 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/states/': typeof StatesIndexRoute
   '/states/$stateId/$venueId': typeof StatesStateIdVenueIdRoute
-  '/states/texas/bar': typeof StatesTexasBarRoute
-  '/states/texas/sports-bar': typeof StatesTexasSportsBarRoute
   '/states/$stateId/': typeof StatesStateIdIndexRoute
   '/states/texas/': typeof StatesTexasIndexRoute
 }
@@ -256,8 +238,6 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/states/'
     | '/states/$stateId/$venueId'
-    | '/states/texas/bar'
-    | '/states/texas/sports-bar'
     | '/states/$stateId/'
     | '/states/texas/'
   fileRoutesByTo: FileRoutesByTo
@@ -281,8 +261,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/states'
     | '/states/$stateId/$venueId'
-    | '/states/texas/bar'
-    | '/states/texas/sports-bar'
     | '/states/$stateId'
     | '/states/texas'
   id:
@@ -307,8 +285,6 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/states/'
     | '/states/$stateId/$venueId'
-    | '/states/texas/bar'
-    | '/states/texas/sports-bar'
     | '/states/$stateId/'
     | '/states/texas/'
   fileRoutesById: FileRoutesById
@@ -326,8 +302,6 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   StatesIndexRoute: typeof StatesIndexRoute
   StatesStateIdVenueIdRoute: typeof StatesStateIdVenueIdRoute
-  StatesTexasBarRoute: typeof StatesTexasBarRoute
-  StatesTexasSportsBarRoute: typeof StatesTexasSportsBarRoute
   StatesStateIdIndexRoute: typeof StatesStateIdIndexRoute
   StatesTexasIndexRoute: typeof StatesTexasIndexRoute
 }
@@ -481,20 +455,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatesStateIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/states/texas/sports-bar': {
-      id: '/states/texas/sports-bar'
-      path: '/states/texas/sports-bar'
-      fullPath: '/states/texas/sports-bar'
-      preLoaderRoute: typeof StatesTexasSportsBarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/states/texas/bar': {
-      id: '/states/texas/bar'
-      path: '/states/texas/bar'
-      fullPath: '/states/texas/bar'
-      preLoaderRoute: typeof StatesTexasBarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/states/$stateId/$venueId': {
       id: '/states/$stateId/$venueId'
       path: '/states/$stateId/$venueId'
@@ -542,21 +502,9 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   StatesIndexRoute: StatesIndexRoute,
   StatesStateIdVenueIdRoute: StatesStateIdVenueIdRoute,
-  StatesTexasBarRoute: StatesTexasBarRoute,
-  StatesTexasSportsBarRoute: StatesTexasSportsBarRoute,
   StatesStateIdIndexRoute: StatesStateIdIndexRoute,
   StatesTexasIndexRoute: StatesTexasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

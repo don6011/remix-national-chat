@@ -14,9 +14,10 @@ interface Props {
   venueId?: string;
   simpleHeader?: boolean;
   topic?: string;
+  fixedInput?: boolean;
 }
 
-export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say something to the chamber…", accentGlow, stateId, venueId, simpleHeader, topic }: Props) {
+export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say something to the chamber…", accentGlow, stateId, venueId, simpleHeader, topic, fixedInput }: Props) {
   const [draft, setDraft] = useState("");
   const [local, setLocal] = useState(messages);
 
@@ -137,20 +138,29 @@ export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say somet
 
       <form
         onSubmit={(e) => { e.preventDefault(); send(); }}
-        className="p-3 border-t border-white/5 flex items-center gap-2 bg-black/20"
+        className={
+          fixedInput
+            ? "fixed left-0 right-0 z-40 px-3 flex items-center gap-2 bottom-[calc(env(safe-area-inset-bottom)+76px)]"
+            : "p-3 border-t border-[rgba(201,168,76,0.2)] flex items-center gap-2 bg-black/20"
+        }
       >
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder={placeholder}
-          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm placeholder:text-muted-foreground/70 outline-none focus:border-gold/40 focus:bg-white/10 transition"
-        />
-        <button
-          type="submit"
-          className="h-10 w-10 rounded-xl glass-gold flex items-center justify-center text-gold hover:scale-105 transition"
-        >
-          <Send className="h-4 w-4" />
-        </button>
+        <div className={fixedInput ? "mx-auto max-w-2xl w-full flex items-center gap-2 glass-strong rounded-2xl p-2 shadow-[0_-8px_30px_-10px_rgba(13,27,62,0.8)]" : "contents"}>
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={placeholder}
+            className="flex-1 bg-white/5 border border-[rgba(201,168,76,0.2)] rounded-xl px-3.5 py-2.5 text-sm placeholder:text-muted-foreground/70 outline-none focus:border-gold/60 focus:bg-white/10 transition"
+            style={{ fontFamily: "var(--font-sans)" }}
+          />
+          <button
+            type="submit"
+            aria-label="Send"
+            className="h-10 w-10 rounded-xl flex items-center justify-center text-[#0D1B3E] hover:scale-105 transition shadow-[0_4px_18px_-4px_rgba(201,168,76,0.55)]"
+            style={{ background: "#C9A84C" }}
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
       </form>
     </div>
   );
