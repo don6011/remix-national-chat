@@ -17,7 +17,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { STATES } from "@/lib/states";
-import { buildChat, NATIONAL_PROMPTS } from "@/lib/mockChat";
+import { useNationalChat } from "@/hooks/use-national-chat";
 
 export const Route = createFileRoute("/")({
   beforeLoad: async () => {
@@ -61,7 +61,7 @@ function Section({
 }
 
 function NationalChamber() {
-  const messages = buildChat(1, NATIONAL_PROMPTS);
+  const { messages, sendMessage, toggleReaction } = useNationalChat();
   const topStates = [...STATES].sort((a, b) => b.live - a.live).slice(0, 6);
 
   return (
@@ -105,6 +105,8 @@ function NationalChamber() {
           stateId="national"
           venueId="chamber"
           fixedInput
+          onSend={sendMessage}
+          onReact={toggleReaction}
         />
 
         {/* SUPPORTING — collapsible below */}
