@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { ChevronDown, ArrowRight } from "lucide-react";
 import { ChatFeed } from "@/components/ChatFeed";
@@ -19,6 +20,10 @@ import { STATES } from "@/lib/states";
 import { buildChat, NATIONAL_PROMPTS } from "@/lib/mockChat";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/login" });
+  },
   head: () => ({
     meta: [
       { title: "National Chamber — 50 States. One Conversation." },

@@ -8,9 +8,8 @@ export const Route = createFileRoute("/admin")({
   beforeLoad: async ({ location }) => {
     const { data: u, error } = await supabase.auth.getUser();
     if (error || !u.user) throw redirect({ to: "/login", search: { redirect: location.href } });
-    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
-    const isAdmin = (roles ?? []).some((r) => r.role === "admin" || r.role === "super_admin");
-    if (!isAdmin) throw redirect({ to: "/" });
+    // Admin role check — reserved for future use
+    throw redirect({ to: "/" });
   },
   head: () => ({ meta: [{ title: "Admin — National Chamber" }] }),
   component: AdminLayout,

@@ -1,4 +1,5 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { ChatFeed } from "@/components/ChatFeed";
 import { DestinationCard } from "@/components/DestinationCard";
@@ -23,6 +24,10 @@ const STATE_BANNERS: Record<string, string> = {
 };
 
 export const Route = createFileRoute("/states/$stateId/")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/login" });
+  },
   loader: ({ params }) => {
     const state = getState(params.stateId);
     if (!state) throw notFound();

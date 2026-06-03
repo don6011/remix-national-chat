@@ -12,11 +12,11 @@ function OverviewPage() {
     queryKey: ["admin-overview"],
     queryFn: async () => {
       const [users, reports, rooms, flags, activeReports] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("citizen_reports").select("id", { count: "exact", head: true }),
-        supabase.from("rooms").select("id", { count: "exact", head: true }).eq("is_archived", false),
-        supabase.from("moderation_flags").select("id", { count: "exact", head: true }).eq("status", "open"),
-        supabase.from("citizen_reports").select("id", { count: "exact", head: true }).eq("status", "approved"),
+        supabase.from("users").select("id", { count: "exact", head: true }),
+        supabase.from("rooms").select("id", { count: "exact", head: true }),
+        supabase.from("rooms").select("id", { count: "exact", head: true }),
+        supabase.from("messages").select("id", { count: "exact", head: true }),
+        supabase.from("messages").select("id", { count: "exact", head: true }),
       ]);
       return {
         users: users.count ?? 0,

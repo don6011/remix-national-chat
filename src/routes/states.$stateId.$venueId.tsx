@@ -1,4 +1,5 @@
-import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect, useRouter } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { ChatFeed } from "@/components/ChatFeed";
 import { RoomEntrance } from "@/components/RoomEntrance";
@@ -104,6 +105,10 @@ function VenueError({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createFileRoute("/states/$stateId/$venueId")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/login" });
+  },
   loader: ({ params }) => {
     const state = getState(params.stateId);
     const venue = getVenue(params.venueId);
