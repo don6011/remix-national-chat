@@ -138,6 +138,9 @@ function Me() {
       <main className="max-w-2xl mx-auto px-5 space-y-8">
         <RankSystem />
 
+        <PathToGovernor />
+
+
         {/* CITIZEN IDENTITY */}
         <section>
           <SectionTitle icon={Shield} title="Citizen Identity" />
