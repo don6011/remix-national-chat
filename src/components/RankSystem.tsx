@@ -46,7 +46,7 @@ export function RankSystem() {
               </div>
             </div>
             <div className="mt-2 text-[11px] text-foreground/70">
-              Next: <span className="text-foreground">Regional Ambassador</span>
+              Next: <span className="text-foreground">Governor</span>
               <span className="text-gold ml-1.5">· {CITIZEN_PCT}% complete</span>
             </div>
           </div>

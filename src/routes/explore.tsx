@@ -5,8 +5,8 @@ import { Flame, Trophy, Vote, MessageCircle, Crown, Shield, Star } from "lucide-
 
 export const Route = createFileRoute("/explore")({
   beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/login" });
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/login" });
   },
   head: () => ({
     meta: [
