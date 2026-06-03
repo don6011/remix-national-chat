@@ -20,12 +20,12 @@ const TONE: Record<Rivalry["tone"], string> = {
 export function NationalIntelBar({
   hero = {
     state: "Texas",
-    venue: "Sports Bar",
+    venue: "Town Hall",
     delta: "+12% this hour",
   },
   rivalries = [
-    { icon: Swords, label: "Headline Rivalry", a: "Texas", b: "Florida", note: "Beach vs Stadium · 2.1k debating", tone: "gold" as const },
-    { icon: TrendingUp, label: "Chasing #1", a: "California", b: "Texas", note: "Creators closing the gap +38%", tone: "cyan" as const },
+    { icon: Swords, label: "Headline Rivalry", a: "Texas", b: "Florida", note: "Town Hall debate · 2.1k weighing in", tone: "gold" as const },
+    { icon: TrendingUp, label: "Chasing #1", a: "California", b: "Texas", note: "Local Stage gap closing +38%", tone: "cyan" as const },
     { icon: Hash, label: "Region Battle", a: "South", b: "West Coast", note: "Culture vs Tech · live now", tone: "violet" as const },
     { icon: Heart, label: "Reactions Tonight", a: "124,802", b: "", note: "Across all 50 states", tone: "rose" as const },
   ],

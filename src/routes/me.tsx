@@ -49,7 +49,7 @@ const RARITY: Record<string, { label: string; cls: string }> = {
 const BADGES = [
   { emoji: "🏛️", title: "Founding Citizen",   desc: "Among the first 1,000 citizens",   date: "Jan 2026", rarity: "legendary" },
   { emoji: "⭐",  title: "Top 5% Contributor", desc: "Ranked in top 5% nationally",      date: "May 2026", rarity: "epic" },
-  { emoji: "🏈", title: "Sports Bar Champion", desc: "100+ posts in Texas Sports Bar",   date: "Mar 2026", rarity: "epic" },
+  { emoji: "🍺", title: "Roadhouse Regular",   desc: "100+ posts in Texas Roadhouse Bar", date: "Mar 2026", rarity: "epic" },
   { emoji: "📣", title: "Town Hall Voice",    desc: "Hosted a verified debate",          date: "Jun 2026", rarity: "rare" },
   { emoji: "☕", title: "Creator Supporter",  desc: "Backed 10+ creators",               date: "Apr 2026", rarity: "rare" },
   { emoji: "🧳", title: "State Traveler",     desc: "Visited 15+ states",                date: "May 2026", rarity: "rare" },
@@ -58,15 +58,16 @@ const BADGES = [
 ];
 
 const ROOM_LEGENDS = [
-  { room: "Texas Sports Bar",      state: "Texas",       rank: "Top 10 contributor",  glow: "oklch(0.78 0.16 60)" },
-  { room: "Mississippi Blues Room", state: "Mississippi", rank: "Top 25 contributor",  glow: "oklch(0.62 0.18 290)" },
-  { room: "Florida Town Hall",     state: "Florida",     rank: "Verified Voice",       glow: "oklch(0.78 0.14 200)" },
+  { room: "Texas Town Hall",         state: "Texas",       rank: "Top 10 contributor",  glow: "oklch(0.78 0.16 60)" },
+  { room: "Mississippi Local Stage", state: "Mississippi", rank: "Top 25 contributor",  glow: "oklch(0.62 0.18 290)" },
+  { room: "Florida Town Hall",       state: "Florida",     rank: "Verified Voice",       glow: "oklch(0.78 0.14 200)" },
 ];
 
 const FAVORITE_SPACES = [
-  { id: "bar",         name: "Sports Bar",  visits: 124, time: "92h", last: "2h ago" },
+  { id: "town-hall",   name: "Town Hall",   visits: 124, time: "92h", last: "2h ago" },
+  { id: "bar",         name: "The Bar",     visits: 92,  time: "63h", last: "5h ago" },
   { id: "coffee-shop", name: "Coffee Shop", visits: 82,  time: "54h", last: "1d ago" },
-  { id: "open-mic",    name: "Local Stage", visits: 53,  time: "31h", last: "3d ago" },
+  { id: "local-stage", name: "Local Stage", visits: 53,  time: "31h", last: "3d ago" },
 ];
 
 function Me() {

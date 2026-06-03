@@ -12,16 +12,16 @@ type FeedItem = {
 };
 
 const SEED: Omit<FeedItem, "id">[] = [
-  { state: "Texas", venue: "Sports Bar", verb: "exploding", heat: "boiling" },
-  { state: "Mississippi", venue: "Blues Room", verb: "rising", heat: "rising" },
-  { state: "California", venue: "Creator District", verb: "trending", heat: "hot" },
-  { state: "Florida", venue: "Beach Debate", verb: "heating up", heat: "hot" },
+  { state: "Texas", venue: "Town Hall", verb: "exploding", heat: "boiling" },
+  { state: "Mississippi", venue: "Local Stage", verb: "rising", heat: "rising" },
+  { state: "California", venue: "Local Stage", verb: "trending", heat: "hot" },
+  { state: "Florida", venue: "The Bar", verb: "heating up", heat: "hot" },
   { state: "Tennessee", venue: "Local Stage", verb: "packed", heat: "hot" },
-  { state: "New York", venue: "City Hall", verb: "debating", heat: "rising" },
-  { state: "Georgia", venue: "Hip-Hop Lounge", verb: "vibing", heat: "hot" },
-  { state: "Illinois", venue: "Deep Dish Diner", verb: "buzzing", heat: "rising" },
-  { state: "Colorado", venue: "Mountain Lodge", verb: "lighting up", heat: "rising" },
-  { state: "Washington", venue: "Coffee Roastery", verb: "brewing", heat: "rising" },
+  { state: "New York", venue: "Town Hall", verb: "debating", heat: "rising" },
+  { state: "Georgia", venue: "Local Stage", verb: "vibing", heat: "hot" },
+  { state: "Illinois", venue: "Coffee Shop", verb: "buzzing", heat: "rising" },
+  { state: "Colorado", venue: "The Bar", verb: "lighting up", heat: "rising" },
+  { state: "Washington", venue: "Coffee Shop", verb: "brewing", heat: "rising" },
 ];
 
 const HEAT_DOT: Record<FeedItem["heat"], string> = {
