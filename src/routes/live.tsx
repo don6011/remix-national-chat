@@ -36,12 +36,12 @@ export const Route = createFileRoute("/live")({
 // ─────────────────────────────────────────────────────────────
 
 const TICKER_ITEMS = [
-  { icon: "🔥", text: "Texas Sports Bar crossed 5,000 live" },
-  { icon: "📈", text: "Mississippi Blues Room +42%" },
-  { icon: "🏖", text: "Florida beach debate hit #1" },
+  { icon: "🍺", text: "Texas Roadhouse Bar crossed 5,000 live" },
+  { icon: "📈", text: "Mississippi Local Stage +42%" },
+  { icon: "🏛", text: "Florida Town Hall hit #1" },
   { icon: "🎤", text: "TailgateKing started a new debate" },
-  { icon: "🎬", text: "California Creator District surging" },
-  { icon: "🗽", text: "New York Business District packed" },
+  { icon: "🎤", text: "California Local Stage surging" },
+  { icon: "☕", text: "New York Coffee Shop packed" },
   { icon: "⚡", text: "DebateCaptain just hit 1k listeners" },
   { icon: "🎸", text: "Tennessee Local Stage standing room only" },
 ];
@@ -60,11 +60,11 @@ const HOT_ROOMS = [
 ];
 
 const STATE_INTEL = [
-  { stateId: "texas",       headline: "Sports Bar dominating",      tag: "5,124 live",  trend: "+18%" },
-  { stateId: "florida",     headline: "Beach debate #1",            tag: "4,448 live",  trend: "+12%" },
-  { stateId: "mississippi", headline: "Blues Room fastest-growing", tag: "1,820 live",  trend: "+42%" },
-  { stateId: "california",  headline: "Creator District surging",   tag: "3,912 live",  trend: "+24%" },
-  { stateId: "new-york",    headline: "Business District packed",   tag: "2,610 live",  trend: "+17%" },
+  { stateId: "texas",       headline: "Roadhouse Bar dominating",   tag: "5,124 live",  trend: "+18%" },
+  { stateId: "florida",     headline: "Town Hall debate #1",        tag: "4,448 live",  trend: "+12%" },
+  { stateId: "mississippi", headline: "Local Stage fastest-growing", tag: "1,820 live",  trend: "+42%" },
+  { stateId: "california",  headline: "Local Stage surging",         tag: "3,912 live",  trend: "+24%" },
+  { stateId: "new-york",    headline: "Coffee Shop packed",          tag: "2,610 live",  trend: "+17%" },
 ];
 
 const TRENDING_TOPICS = [
@@ -75,10 +75,10 @@ const TRENDING_TOPICS = [
 ];
 
 const LIVE_HOSTS = [
-  { rank: 1, handle: "TailgateKing",  state: "Texas",       room: "Sports Bar",        listeners: 1_240, top: true,  accent: "oklch(0.78 0.16 60)" },
-  { rank: 2, handle: "DebateCaptain", state: "Florida",     room: "Town Hall",         listeners: 980,   top: true,  accent: "oklch(0.72 0.18 200)" },
-  { rank: 3, handle: "BluesBoss",     state: "Mississippi", room: "Local Stage",       listeners: 612,   top: false, accent: "oklch(0.62 0.16 320)" },
-  { rank: 4, handle: "LoneStarMaya",  state: "Texas",       room: "Coffee Shop",       listeners: 487,   top: false, accent: "oklch(0.78 0.16 60)" },
+  { rank: 1, handle: "TailgateKing",  state: "Texas",       room: "The Bar",     listeners: 1_240, top: true,  accent: "oklch(0.78 0.16 60)" },
+  { rank: 2, handle: "DebateCaptain", state: "Florida",     room: "Town Hall",   listeners: 980,   top: true,  accent: "oklch(0.72 0.18 200)" },
+  { rank: 3, handle: "BluesBoss",     state: "Mississippi", room: "Local Stage", listeners: 612,   top: false, accent: "oklch(0.62 0.16 320)" },
+  { rank: 4, handle: "LoneStarMaya",  state: "Texas",       room: "Coffee Shop", listeners: 487,   top: false, accent: "oklch(0.78 0.16 60)" },
 ];
 
 // ─────────────────────────────────────────────────────────────
