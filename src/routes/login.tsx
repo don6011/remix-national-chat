@@ -32,12 +32,13 @@ function LoginPage() {
       setError(error.message);
       return;
     }
-    // Route new users through onboarding
+    // Route new users through onboarding; default to Chamber on any DB error
     let dest = redirect ?? "/";
     if (data.user) {
       const { data: appUser } = await supabase
         .from("users").select("onboarded").eq("id", data.user.id).maybeSingle();
-      if (!appUser || !appUser.onboarded) dest = "/onboarding";
+      // Only redirect to onboarding when we can confirm onboarded is explicitly false
+      if (appUser && appUser.onboarded === false) dest = "/onboarding";
     }
     setBusy(false);
     navigate({ to: dest, replace: true });

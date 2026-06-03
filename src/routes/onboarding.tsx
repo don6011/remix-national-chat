@@ -8,6 +8,13 @@ export const Route = createFileRoute("/onboarding")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/login" });
+    // Skip onboarding if already completed
+    const { data: row } = await supabase
+      .from("users")
+      .select("onboarded")
+      .eq("id", data.session.user.id)
+      .maybeSingle();
+    if (row?.onboarded) throw redirect({ to: "/" });
   },
   head: () => ({ meta: [{ title: "Welcome — National Chat" }] }),
   component: OnboardingPage,

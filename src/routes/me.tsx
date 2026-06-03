@@ -1,9 +1,11 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { STATES } from "@/lib/states";
 import { RankSystem } from "@/components/RankSystem";
+import type { Tables } from "@/integrations/supabase/types";
 import {
   Shield, MapPin, Circle, Crown, CheckCircle2, LogOut, LogIn,
 } from "lucide-react";
@@ -32,8 +34,42 @@ const GOVERNOR_TASKS: { label: string; done: boolean; progress: string }[] = [
 
 function Me() {
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useAuth();
-  const home = STATES.find((s) => s.id === "texas") ?? STATES[0];
+  const { isAuthenticated, loading, user } = useAuth();
+  const [appUser, setAppUser] = useState<Tables<"users"> | null>(null);
+  const [citizenNo, setCitizenNo] = useState<number | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    async function load() {
+      setUserLoading(true);
+      const [{ data: row }, { count }] = await Promise.all([
+        supabase.from("users").select("*").eq("id", user!.id).maybeSingle(),
+        supabase.from("users").select("*", { count: "exact", head: true })
+          .lte("created_at", user!.created_at ?? new Date().toISOString()),
+      ]);
+      setAppUser(row ?? null);
+      setCitizenNo(count ?? null);
+      setUserLoading(false);
+    }
+    load();
+  }, [user]);
+
+  const home = STATES.find((s) =>
+    appUser?.home_state
+      ? s.name.toLowerCase() === appUser.home_state.toLowerCase() ||
+        s.id.toLowerCase() === appUser.home_state.toLowerCase()
+      : s.id === "texas"
+  ) ?? STATES[0];
+
+  const displayName = appUser?.display_name || appUser?.username || user?.email?.split("@")[0] || "Citizen";
+  const initials = displayName.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
+  const passportNo = citizenNo != null
+    ? String(citizenNo).padStart(6, "0")
+    : user?.id.slice(0, 6).toUpperCase() ?? "------";
+  const memberYear = appUser?.created_at
+    ? new Date(appUser.created_at).getFullYear()
+    : new Date().getFullYear();
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -88,7 +124,7 @@ function Me() {
                   className="text-gold tabular-nums font-semibold tracking-[0.2em] text-sm"
                   style={{ fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}
                 >
-                  No. 000482
+                  No. {passportNo}
                 </div>
                 <button
                   onClick={handleSignOut}
@@ -103,8 +139,8 @@ function Me() {
 
             <div className="relative mt-5 flex items-center gap-4">
               <div className="relative">
-                <div className="h-16 w-16 rounded-2xl glass-gold flex items-center justify-center text-2xl text-gold">
-                  JR
+                <div className="h-16 w-16 rounded-2xl glass-gold flex items-center justify-center text-xl font-bold text-gold">
+                  {userLoading ? "…" : initials}
                 </div>
                 <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-emerald-400 ring-2 ring-[#0E1A38] animate-pulse" />
               </div>
@@ -112,12 +148,14 @@ function Me() {
                 <div className="section-label flex items-center gap-1">
                   <MapPin className="h-3 w-3" /> {home.name}
                 </div>
-                <h1 className="font-display text-2xl leading-none mt-1">Jordan Reyes</h1>
+                <h1 className="font-display text-2xl leading-none mt-1">
+                  {userLoading ? "Loading…" : displayName}
+                </h1>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
-                  <span className="text-gold flex items-center gap-1">
-                    <Shield className="h-3 w-3" /> State Ambassador
+                  <span className="text-gold flex items-center gap-1 capitalize">
+                    <Shield className="h-3 w-3" /> {appUser?.rank ?? "Citizen"}
                   </span>
-                  <span className="text-foreground/60">Citizen since 2026</span>
+                  <span className="text-foreground/60">Citizen since {memberYear}</span>
                   <span className="text-emerald-300 flex items-center gap-1">
                     <Circle className="h-2 w-2 fill-emerald-400 text-emerald-400" /> Online
                   </span>
