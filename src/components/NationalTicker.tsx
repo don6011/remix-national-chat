@@ -4,16 +4,16 @@ import { subscribeActivity } from "@/lib/activityBus";
 type TickerItem = { icon: string; text: string };
 
 const SEED: TickerItem[] = [
-  { icon: "🔥", text: "Texas Sports Bar +412" },
-  { icon: "🎸", text: "Mississippi Blues Room rising" },
-  { icon: "🌴", text: "Florida Beach Debate exploding" },
-  { icon: "🎬", text: "California Creator District packed" },
-  { icon: "🗽", text: "New York Business District trending" },
+  { icon: "🍺", text: "Texas Roadhouse Bar +412" },
+  { icon: "🎸", text: "Mississippi Local Stage rising" },
+  { icon: "🏛", text: "Florida Town Hall exploding" },
+  { icon: "🎤", text: "California Local Stage packed" },
+  { icon: "☕", text: "New York Coffee Shop trending" },
   { icon: "🎤", text: "Tennessee Local Stage standing room only" },
-  { icon: "🍑", text: "Georgia Hip-Hop Lounge surging" },
-  { icon: "☕", text: "Washington Coffee Roastery brewing" },
-  { icon: "🏔️", text: "Colorado Mountain Lodge lighting up" },
-  { icon: "🍕", text: "Illinois Deep Dish Diner buzzing" },
+  { icon: "🏛", text: "Georgia Town Hall surging" },
+  { icon: "☕", text: "Washington Coffee Shop brewing" },
+  { icon: "🍺", text: "Colorado Mountain Bar lighting up" },
+  { icon: "🏛", text: "Illinois Town Hall buzzing" },
 ];
 
 export function NationalTicker() {
