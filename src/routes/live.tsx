@@ -59,13 +59,6 @@ const HOT_ROOMS = [
   { stateId: "california", venueId: "local-stage", topic: "LA vs SF creator war",          live: 3912 },
 ];
 
-const STATE_INTEL = [
-  { stateId: "texas",       headline: "Roadhouse Bar dominating",   tag: "5,124 live",  trend: "+18%" },
-  { stateId: "florida",     headline: "Town Hall debate #1",        tag: "4,448 live",  trend: "+12%" },
-  { stateId: "mississippi", headline: "Local Stage fastest-growing", tag: "1,820 live",  trend: "+42%" },
-  { stateId: "california",  headline: "Local Stage surging",         tag: "3,912 live",  trend: "+24%" },
-  { stateId: "new-york",    headline: "Coffee Shop packed",          tag: "2,610 live",  trend: "+17%" },
-];
 
 const TRENDING_TOPICS = [
   { label: "Texas vs Florida",      talking: 12_400, states: ["TX", "FL"],       delta: 31 },
