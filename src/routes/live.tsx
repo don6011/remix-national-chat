@@ -59,13 +59,6 @@ const HOT_ROOMS = [
   { stateId: "california", venueId: "local-stage", topic: "LA vs SF creator war",          live: 3912 },
 ];
 
-const STATE_INTEL = [
-  { stateId: "texas",       headline: "Roadhouse Bar dominating",   tag: "5,124 live",  trend: "+18%" },
-  { stateId: "florida",     headline: "Town Hall debate #1",        tag: "4,448 live",  trend: "+12%" },
-  { stateId: "mississippi", headline: "Local Stage fastest-growing", tag: "1,820 live",  trend: "+42%" },
-  { stateId: "california",  headline: "Local Stage surging",         tag: "3,912 live",  trend: "+24%" },
-  { stateId: "new-york",    headline: "Coffee Shop packed",          tag: "2,610 live",  trend: "+17%" },
-];
 
 const TRENDING_TOPICS = [
   { label: "Texas vs Florida",      talking: 12_400, states: ["TX", "FL"],       delta: 31 },
@@ -271,47 +264,6 @@ function LivePage() {
         </div>
       </section>
 
-      {/* STATE INTELLIGENCE */}
-      <section>
-        <SectionHeader icon="🧭" title="State intelligence" sub="Top signal coming out of every major state." />
-        <div className="grid gap-2">
-          {STATE_INTEL.map((row, i) => {
-            const state = STATES.find((s) => s.id === row.stateId)!;
-            return (
-              <motion.div
-                key={row.stateId}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <Link
-                  to="/states/$stateId"
-                  params={{ stateId: row.stateId }}
-                  className="relative overflow-hidden glass rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-white/[0.07] transition group"
-                >
-                  <div
-                    className="absolute left-0 top-0 bottom-0 w-[3px]"
-                    style={{ background: state.glow }}
-                  />
-                  <span className="text-xl shrink-0">{state.emoji}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[10px] uppercase tracking-[0.22em] text-foreground/60">
-                      {state.name}
-                    </div>
-                    <div className="text-sm font-medium truncate">{row.headline}</div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-[11px] text-foreground/70 tabular-nums">{row.tag}</div>
-                    <div className="text-[11px] font-medium text-emerald-400 tabular-nums flex items-center gap-0.5 justify-end">
-                      <TrendingUp className="h-3 w-3" /> {row.trend}
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
 
       {/* TRENDING TOPICS */}
       <section>
