@@ -82,37 +82,42 @@ function Me() {
     <div className="relative pb-16">
       {/* HERO — CITIZEN PASSPORT */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[oklch(0.18_0.06_260)] via-[oklch(0.14_0.05_262)] to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#080F24] via-[#0E1A38] to-transparent" />
         <div className="absolute inset-0 particles" />
         <div className="relative max-w-2xl mx-auto px-5 pt-8 pb-6">
-          <div className="flex items-center justify-between">
-            <div className="text-[11px] uppercase tracking-[0.3em] text-gold/90">
-              Citizen Passport
-            </div>
-            <div className="text-[10px] uppercase tracking-widest text-foreground/50">
-              No. 000482
-            </div>
-          </div>
-
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-5 glass-strong rounded-3xl p-5 relative overflow-hidden"
+            className="rounded-3xl p-5 relative overflow-hidden border"
+            style={{
+              background: "linear-gradient(160deg, #080F24 0%, #0E1A38 55%, #141F42 100%)",
+              borderColor: "rgba(201,168,76,0.4)",
+            }}
           >
             <div
-              className="absolute -top-16 -right-12 h-44 w-44 rounded-full blur-3xl opacity-60"
+              className="absolute -top-20 -right-16 h-52 w-52 rounded-full blur-3xl opacity-50"
               style={{ background: home.glow }}
             />
-            <div className="relative flex items-center gap-4">
+            <div className="relative flex items-center justify-between">
+              <div className="section-label">Citizen Passport</div>
+              <div
+                className="text-gold tabular-nums font-semibold tracking-[0.2em] text-sm"
+                style={{ fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace" }}
+              >
+                No. 000482
+              </div>
+            </div>
+
+            <div className="relative mt-5 flex items-center gap-4">
               <div className="relative">
                 <div className="h-16 w-16 rounded-2xl glass-gold flex items-center justify-center text-2xl text-gold">
                   JR
                 </div>
-                <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-emerald-400 ring-2 ring-[oklch(0.14_0.05_262)] animate-pulse" />
+                <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-emerald-400 ring-2 ring-[#0E1A38] animate-pulse" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-foreground/60">
-                  <MapPin className="h-3 w-3" /> {home.name} Citizen
+                <div className="section-label flex items-center gap-1">
+                  <MapPin className="h-3 w-3" /> {home.name}
                 </div>
                 <h1 className="font-display text-2xl leading-none mt-1">Jordan Reyes</h1>
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
