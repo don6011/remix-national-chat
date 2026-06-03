@@ -20,7 +20,6 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [sent, setSent] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -33,8 +32,7 @@ function SignupPage() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
-        // Pass fields through metadata — the DB trigger reads these to populate public.users
+        // Pass fields through metadata — DB trigger reads these to populate public.users
         data: {
           username: username.trim().toLowerCase().replace(/\s/g, ""),
           display_name: displayName.trim() || null,
@@ -43,29 +41,27 @@ function SignupPage() {
       },
     });
 
-    if (signUpError) { setBusy(false); setError(signUpError.message); return; }
-    // No manual insert needed — a Postgres trigger on auth.users automatically
-    // creates the public.users row with SECURITY DEFINER, bypassing RLS.
-
     setBusy(false);
+
+    if (signUpError) {
+      setError(signUpError.message);
+      return;
+    }
+
+    // Email confirmation is disabled in Supabase — session is always returned on signup.
+    // Navigate directly to onboarding. The DB trigger has already created the users row.
     if (data.session) {
       navigate({ to: "/onboarding", replace: true });
     } else {
-      setSent(true);
+      // Fallback: session missing means email confirmation is unexpectedly still on.
+      // Sign them in explicitly.
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        setError("Account created but sign-in failed. Please sign in manually.");
+        return;
+      }
+      navigate({ to: "/onboarding", replace: true });
     }
-  }
-
-  if (sent) {
-    return (
-      <AuthShell title="Check your email" subtitle="We sent a confirmation link to verify your account.">
-        <p className="text-sm text-foreground/75 text-center">
-          Click the link in <span className="text-gold">{email}</span> to activate your Citizen account.
-        </p>
-        <Link to="/login" className="mt-6 block text-center text-[11px] uppercase tracking-wider text-gold/90 hover:text-gold">
-          Back to sign in
-        </Link>
-      </AuthShell>
-    );
   }
 
   return (
