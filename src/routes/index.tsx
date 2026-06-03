@@ -1,22 +1,11 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { ChevronDown, ArrowRight } from "lucide-react";
+import { Send } from "lucide-react";
 import { ChatFeed } from "@/components/ChatFeed";
-import { StateCard } from "@/components/StateCard";
 import { UsaMapGlow } from "@/components/UsaMapGlow";
-import { NationalIntelBar } from "@/components/NationalIntelBar";
 import { NationalTicker } from "@/components/NationalTicker";
-import { StateLeaderboard } from "@/components/StateLeaderboard";
-import { NationalTopics } from "@/components/NationalTopics";
 import { LivePulseStrip } from "@/components/LivePulseStrip";
-import { AmericaRightNow } from "@/components/AmericaRightNow";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { STATES } from "@/lib/states";
 import { useNationalChat } from "@/hooks/use-national-chat";
 
 export const Route = createFileRoute("/")({
@@ -37,35 +26,43 @@ export const Route = createFileRoute("/")({
   component: NationalChamber,
 });
 
-function Section({
-  label,
-  defaultOpen = false,
-  children,
-}: {
-  label: string;
-  defaultOpen?: boolean;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl glass hover:border-gold/50 transition group">
-        <span className="section-label">{label}</span>
-        <ChevronDown
-          className={`h-4 w-4 text-foreground/60 transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="pt-3">{children}</CollapsibleContent>
-    </Collapsible>
-  );
-}
-
 function NationalChamber() {
   const { messages, sendMessage, toggleReaction } = useNationalChat();
-  const topStates = [...STATES].sort((a, b) => b.live - a.live).slice(0, 6);
+  const [draft, setDraft] = useState("");
+
+  function handleSend() {
+    if (!draft.trim()) return;
+    sendMessage(draft.trim());
+    setDraft("");
+  }
 
   return (
     <div className="relative min-h-screen" style={{ background: "#0D1B3E" }}>
+      {/* Fixed input — rendered at root level to avoid any stacking-context traps */}
+      <form
+        onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+        className="fixed left-0 right-0 z-40 px-3 flex items-center gap-2 bottom-[calc(env(safe-area-inset-bottom)+76px)]"
+      >
+        <div className="mx-auto max-w-2xl w-full flex items-center gap-2 glass-strong rounded-2xl p-2 shadow-[0_-8px_30px_-10px_rgba(13,27,62,0.8)]">
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+            placeholder="Speak up, America..."
+            className="flex-1 bg-white/5 border border-[rgba(201,168,76,0.2)] rounded-xl px-3.5 py-2.5 text-sm placeholder:text-muted-foreground/70 outline-none focus:border-gold/60 focus:bg-white/10 transition"
+            style={{ fontFamily: "var(--font-sans)" }}
+          />
+          <button
+            type="submit"
+            aria-label="Send"
+            className="h-10 w-10 rounded-xl flex items-center justify-center text-[#0D1B3E] hover:scale-105 transition shadow-[0_4px_18px_-4px_rgba(201,168,76,0.55)]"
+            style={{ background: "#C9A84C" }}
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
+      </form>
+
       {/* National ticker */}
       <div className="sticky top-0 z-40 px-3 pt-2 pb-1 backdrop-blur-md border-b border-[rgba(201,168,76,0.2)]" style={{ background: "rgba(13,27,62,0.92)" }}>
         <div className="max-w-2xl mx-auto">
@@ -95,54 +92,15 @@ function NationalChamber() {
       <main className="max-w-2xl mx-auto px-3 sm:px-5 pt-3 pb-40 space-y-3 relative">
         <LivePulseStrip />
 
-        {/* PRIMARY — the national chat dominates */}
         <ChatFeed
           messages={messages}
           liveCount={38402}
           simpleHeader
           topic="What's capturing America's attention tonight?"
-          placeholder="Speak up, America..."
           stateId="national"
           venueId="chamber"
-          fixedInput
-          onSend={sendMessage}
           onReact={toggleReaction}
         />
-
-        {/* SUPPORTING — collapsible below */}
-        <div className="space-y-2 pt-2">
-          <Section label="National Intelligence">
-            <NationalIntelBar
-              hero={{ state: "Texas", venue: "Town Hall", delta: "+12% this hour" }}
-              liveCitizens="38,402"
-            />
-          </Section>
-
-          <Section label="National Debates">
-            <NationalTopics />
-          </Section>
-
-          <Section label="State Leaderboard">
-            <StateLeaderboard />
-          </Section>
-
-          <Section label="America Right Now">
-            <AmericaRightNow />
-          </Section>
-
-          <Section label="Step into a state">
-            <div className="flex items-center justify-end mb-2">
-              <Link to="/states" className="text-xs flex items-center gap-1" style={{ color: "#C9A84C" }}>
-                All 50 <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-            <div className="grid gap-3">
-              {topStates.map((s, i) => (
-                <StateCard key={s.id} state={s} index={i} />
-              ))}
-            </div>
-          </Section>
-        </div>
       </main>
     </div>
   );
