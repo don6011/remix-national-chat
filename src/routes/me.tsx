@@ -6,7 +6,7 @@ import { RankSystem } from "@/components/RankSystem";
 import {
   Shield, MapPin, Award, Sparkles, Flame, Trophy, Mic2,
   MessageSquare, Hash, Heart, Users, Clock, Compass, CheckCircle2,
-  Circle,
+  Circle, Crown,
 } from "lucide-react";
 
 export const Route = createFileRoute("/me")({
