@@ -32,15 +32,15 @@ export const Route = createFileRoute("/states/texas/")({
 });
 
 const PULSE_FEED = [
-  { emoji: "🔥", text: "Cowboys debate passed 2,000 replies" },
-  { emoji: "🏈", text: "Big Tex Sports Bar reached PACKED status" },
+  { emoji: "🏛", text: "Town Hall housing proposal hit 1,400 votes" },
+  { emoji: "🍺", text: "The Roadhouse Bar reached PACKED status" },
   { emoji: "🤠", text: "37 new citizens just arrived from Austin" },
   { emoji: "🏆", text: "Texas moved to #1 nationally tonight" },
   { emoji: "🎸", text: "Nashville stage is challenging Austin Local Stage" },
   { emoji: "🏛", text: "Town Hall: housing proposal hit 1,400 votes" },
   { emoji: "🍺", text: "BBQ war exploding at The Bar — Franklin vs Snow's" },
   { emoji: "☕", text: "Hill Country Coffee Shop trending: career pivots" },
-  { emoji: "⚡", text: "LoneStarMaya pinned a hot take in Sports Bar" },
+  { emoji: "⚡", text: "LoneStarMaya pinned a hot take in Town Hall" },
   { emoji: "🗳", text: "Election countdown under 4 days — turnout climbing" },
 ];
 
@@ -251,7 +251,7 @@ function TexasSpace() {
         <ChatFeed
           messages={messages}
           liveCount={citizens}
-          pinned={`🤠 Texas pinned: Cowboys vs Eagles tonight — Sports Bar packed`}
+          pinned={`🤠 Texas pinned: Cowboys vs Eagles tonight — The Roadhouse packed`}
           placeholder="Speak up, Texas…"
           accentGlow="oklch(0.70 0.24 28 / 0.5)"
         />
@@ -334,7 +334,7 @@ function TexasSpace() {
                 <DrawerBlock title="Texas history" icon={<History className="h-3.5 w-3.5 text-gold" />}>
                   <ul className="text-xs space-y-1.5 text-foreground/80">
                     <li>· Reached #1 nationally — 3 nights in a row</li>
-                    <li>· Sports Bar broke 2,000 concurrent — first state to do so</li>
+                    <li>· Town Hall broke 2,000 concurrent — first state to do so</li>
                     <li>· Town Hall passed 14 community proposals this season</li>
                     <li>· LoneStarMaya elected Governor on a 71% turnout</li>
                   </ul>
