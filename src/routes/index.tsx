@@ -99,6 +99,7 @@ function NationalChamber() {
           topic="What's capturing America's attention tonight?"
           stateId="national"
           venueId="chamber"
+          fixedInput
           onReact={toggleReaction}
         />
       </main>
