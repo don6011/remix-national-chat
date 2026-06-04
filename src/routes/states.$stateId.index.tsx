@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { getState, STATES } from "@/lib/states";
 import { getDestinations } from "@/lib/destinations";
 import { buildChat } from "@/lib/mockChat";
+import { supabase as sb } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Trophy, Flame, Users } from "lucide-react";
 import floridaBanner from "@/assets/florida-welcome-banner.png.asset.json";
 import mississippiBanner from "@/assets/mississippi-welcome-banner.png.asset.json";
@@ -50,6 +52,18 @@ export const Route = createFileRoute("/states/$stateId/")({
 
 function StateSpace() {
   const { state } = Route.useLoaderData();
+  // Real active_users counts from DB, keyed by room_type
+  const [roomCounts, setRoomCounts] = useState<Record<string, number>>({});
+  useEffect(() => {
+    sb.from("rooms").select("room_type, active_users").eq("state", state.id)
+      .then(({ data }) => {
+        if (!data) return;
+        const counts: Record<string, number> = {};
+        data.forEach((r) => { counts[r.room_type] = r.active_users; });
+        setRoomCounts(counts);
+      });
+  }, [state.id]);
+
   const messages = buildChat(state.live, [
     `${state.name} in the building. Who's repping tonight?`,
     state.trendingTopic + " — thoughts?",
@@ -221,7 +235,11 @@ function StateSpace() {
         {/* Destinations */}
         <section>
           {(() => {
-            const destinations = getDestinations(state.id, state.live);
+            const destinations = getDestinations(state.id, state.live).map((d) => ({
+              ...d,
+              inside: roomCounts[d.id] ?? d.inside,
+            }));
+            const totalInside = destinations.reduce((s, d) => s + d.inside, 0);
             return (
               <>
                 <div className="flex items-end justify-between mb-3">
@@ -230,7 +248,7 @@ function StateSpace() {
                     <h2 className="font-display text-2xl mt-1">Where to go in {state.name}</h2>
                   </div>
                   <div className="text-[10px] text-foreground/55 flex items-center gap-1.5">
-                    <Users className="h-3 w-3" /> {destinations.reduce((s, d) => s + d.inside, 0).toLocaleString()} inside
+                    <Users className="h-3 w-3" /> {totalInside.toLocaleString()} inside
                   </div>
                 </div>
                 <div className="space-y-3">
