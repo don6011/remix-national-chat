@@ -66,49 +66,37 @@ function buildChatMessage(
 export function useNationalChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const uidRef = useRef<string | null>(null);
   const reactionsRef = useRef<DbReaction[]>([]);
   const messagesRef = useRef<DbMessage[]>([]);
+  const optimisticIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     async function init() {
       const { data: { session } } = await supabase.auth.getSession();
-      const uid = session?.user?.id ?? null;
-      setCurrentUserId(uid);
+      uidRef.current = session?.user?.id ?? null;
+      const uid = uidRef.current;
 
-      const [{ data: msgRows }, { data: reactionRows }] = await Promise.all([
-        supabase
-          .from("messages")
-          .select("id, content, created_at, user_id, users(username, display_name, home_state, rank)")
-          .eq("is_national", true)
-          .order("created_at", { ascending: false })
-          .limit(50) as Promise<{ data: DbMessage[] | null }>,
-        supabase.from("reactions").select("id, message_id, reaction_type, user_id"),
-      ]);
-
-      const rows = (msgRows ?? []).reverse();
-      const reactions = reactionRows ?? [];
-      messagesRef.current = rows;
-      reactionsRef.current = reactions;
-
-      setMessages(rows.map((r) => buildChatMessage(r, reactions, uid)));
-      setLoading(false);
-
+      // Subscribe immediately so messages sent right after mount are captured
       channel = supabase
         .channel("national-chat")
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "messages", filter: "is_national=eq.true" },
           async (payload) => {
-            const newMsg = payload.new as { id: string; content: string; created_at: string; user_id: string };
+            const incoming = payload.new as { id: string; content: string; created_at: string; user_id: string };
+            if (optimisticIds.current.has(incoming.id)) {
+              optimisticIds.current.delete(incoming.id);
+              return;
+            }
             const { data: userData } = await supabase
               .from("users")
               .select("username, display_name, home_state, rank")
-              .eq("id", newMsg.user_id)
+              .eq("id", incoming.user_id)
               .maybeSingle();
-            const full: DbMessage = { ...newMsg, users: userData ?? null };
+            const full: DbMessage = { ...incoming, users: userData ?? null };
             messagesRef.current = [...messagesRef.current, full];
             setMessages(messagesRef.current.map((r) => buildChatMessage(r, reactionsRef.current, uid)));
           },
@@ -130,6 +118,24 @@ export function useNationalChat() {
           },
         )
         .subscribe();
+
+      // Fetch last 50 messages + reactions
+      const [{ data: msgRows }, { data: reactionRows }] = await Promise.all([
+        supabase
+          .from("messages")
+          .select("id, content, created_at, user_id, users(username, display_name, home_state, rank)")
+          .eq("is_national", true)
+          .order("created_at", { ascending: false })
+          .limit(50) as Promise<{ data: DbMessage[] | null }>,
+        supabase.from("reactions").select("id, message_id, reaction_type, user_id"),
+      ]);
+
+      const rows = (msgRows ?? []).reverse();
+      const reactions = reactionRows ?? [];
+      messagesRef.current = rows;
+      reactionsRef.current = reactions;
+      setMessages(rows.map((r) => buildChatMessage(r, reactions, uid)));
+      setLoading(false);
     }
 
     init();
@@ -142,22 +148,55 @@ export function useNationalChat() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    const { data: userRow } = await supabase
+    const { data: meRow } = await supabase
       .from("users")
-      .select("home_state, messages_sent")
+      .select("home_state, messages_sent, username, display_name, rank")
       .eq("id", session.user.id)
       .maybeSingle();
 
-    await supabase.from("messages").insert({
+    // Optimistic update — message appears instantly
+    const tempId = `optimistic-${Date.now()}`;
+    const optimisticMsg: DbMessage = {
+      id: tempId,
+      content: trimmed,
+      created_at: new Date().toISOString(),
+      user_id: session.user.id,
+      users: meRow ? {
+        username: meRow.username,
+        display_name: meRow.display_name,
+        home_state: meRow.home_state,
+        rank: meRow.rank,
+      } : null,
+    };
+    messagesRef.current = [...messagesRef.current, optimisticMsg];
+    setMessages(messagesRef.current.map((r) => buildChatMessage(r, reactionsRef.current, uidRef.current)));
+
+    const { data: inserted, error } = await supabase.from("messages").insert({
       content: trimmed,
       user_id: session.user.id,
       is_national: true,
-      state: userRow?.home_state ?? "Texas",
-    });
+      state: meRow?.home_state ?? "texas",
+    }).select("id").single();
 
-    const newCount = (userRow?.messages_sent ?? 0) + 1;
-    await supabase.from("users").update({ messages_sent: newCount }).eq("id", session.user.id);
-    await checkAndUpgradeRank(session.user.id);
+    if (error) {
+      // Roll back on failure
+      messagesRef.current = messagesRef.current.filter((m) => m.id !== tempId);
+      setMessages(messagesRef.current.map((r) => buildChatMessage(r, reactionsRef.current, uidRef.current)));
+      return;
+    }
+
+    if (inserted?.id) {
+      optimisticIds.current.add(inserted.id);
+      messagesRef.current = messagesRef.current.map((m) =>
+        m.id === tempId ? { ...m, id: inserted.id } : m,
+      );
+      setMessages(messagesRef.current.map((r) => buildChatMessage(r, reactionsRef.current, uidRef.current)));
+    }
+
+    // Stat increments (fire and forget)
+    const newCount = (meRow?.messages_sent ?? 0) + 1;
+    supabase.from("users").update({ messages_sent: newCount }).eq("id", session.user.id);
+    checkAndUpgradeRank(session.user.id);
   }
 
   async function toggleReaction(messageId: string, emoji: string, authorId: string) {
@@ -176,7 +215,6 @@ export function useNationalChat() {
         reaction_type: emoji,
         user_id: session.user.id,
       });
-      // Increment author's reactions_received
       if (authorId && authorId !== session.user.id) {
         const { data: authorRow } = await supabase
           .from("users")
@@ -184,8 +222,8 @@ export function useNationalChat() {
           .eq("id", authorId)
           .maybeSingle();
         const newCount = (authorRow?.reactions_received ?? 0) + 1;
-        await supabase.from("users").update({ reactions_received: newCount }).eq("id", authorId);
-        await checkAndUpgradeRank(authorId);
+        supabase.from("users").update({ reactions_received: newCount }).eq("id", authorId);
+        checkAndUpgradeRank(authorId);
       }
     }
   }
