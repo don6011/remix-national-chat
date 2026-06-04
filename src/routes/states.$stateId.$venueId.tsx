@@ -144,7 +144,7 @@ function VenueRoom() {
   const venueTopic = personality.pinned;
   const venueCta = personality.primaryCta;
 
-  const { room, messages, sendMessage, toggleReaction } = useStateRoomChat(state.id, venue.id);
+  const { room, messages, ready, sendMessage, toggleReaction } = useStateRoomChat(state.id, venue.id);
   const liveHere = room?.active_users ?? Math.max(40, Math.floor(state.live / 4));
 
   const atmClass =
@@ -271,6 +271,7 @@ function VenueRoom() {
           accentGlow={venue.glow}
           stateId={state.id}
           venueId={venue.id}
+          disabled={!ready}
           onSend={sendMessage}
           onReact={toggleReaction}
         />

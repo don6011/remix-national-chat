@@ -17,15 +17,16 @@ interface Props {
   simpleHeader?: boolean;
   topic?: string;
   fixedInput?: boolean;
+  disabled?: boolean;
   onSend?: (content: string) => void;
   onReact?: (messageId: string, emoji: string, authorId: string) => void;
 }
 
-export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say something to the chamber…", accentGlow, stateId, venueId, simpleHeader, topic, fixedInput, onSend, onReact }: Props) {
+export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say something to the chamber…", accentGlow, stateId, venueId, simpleHeader, topic, fixedInput, disabled, onSend, onReact }: Props) {
   const [draft, setDraft] = useState("");
 
   const send = () => {
-    if (!draft.trim()) return;
+    if (!draft.trim() || disabled) return;
     if (onSend) onSend(draft.trim());
     setDraft("");
     emitActivity({ type: "post", stateId, venueId });
@@ -153,14 +154,16 @@ export function ChatFeed({ messages, liveCount, pinned, placeholder = "Say somet
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-            placeholder={placeholder}
-            className="flex-1 bg-white/5 border border-[rgba(201,168,76,0.2)] rounded-xl px-3.5 py-2.5 text-sm placeholder:text-muted-foreground/70 outline-none focus:border-gold/60 focus:bg-white/10 transition"
+            placeholder={disabled ? "Loading room…" : placeholder}
+            disabled={disabled}
+            className="flex-1 bg-white/5 border border-[rgba(201,168,76,0.2)] rounded-xl px-3.5 py-2.5 text-sm placeholder:text-muted-foreground/70 outline-none focus:border-gold/60 focus:bg-white/10 transition disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ fontFamily: "var(--font-sans)" }}
           />
           <button
             type="submit"
             aria-label="Send"
-            className="h-10 w-10 rounded-xl flex items-center justify-center text-[#0D1B3E] hover:scale-105 transition shadow-[0_4px_18px_-4px_rgba(201,168,76,0.55)]"
+            disabled={disabled}
+            className="h-10 w-10 rounded-xl flex items-center justify-center text-[#0D1B3E] hover:scale-105 transition shadow-[0_4px_18px_-4px_rgba(201,168,76,0.55)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             style={{ background: "#C9A84C" }}
           >
             <Send className="h-4 w-4" />
