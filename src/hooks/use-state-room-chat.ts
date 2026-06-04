@@ -258,8 +258,6 @@ export function useStateRoomChat(stateId: string, venueId: string) {
         room_id: currentRoomId,
         state: stateId,
         is_national: false,
-        topic: "",
-        extension: "",
       })
       .select("id")
       .single();

@@ -176,8 +176,6 @@ export function useNationalChat() {
       user_id: session.user.id,
       is_national: true,
       state: meRow?.home_state ?? "texas",
-      topic: "",
-      extension: "",
     }).select("id").single();
 
     if (error) {
