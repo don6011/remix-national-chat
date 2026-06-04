@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { getState } from "@/lib/states";
 import { getVenue } from "@/lib/venues";
 import { getVenuePersonality } from "@/lib/venuePersonality";
-import { buildChat, VENUE_PROMPTS, TEXAS_VENUE_PROMPTS } from "@/lib/mockChat";
+import { useStateRoomChat } from "@/hooks/use-state-room-chat";
 import { ArrowLeft, Users, Activity, DoorOpen } from "lucide-react";
 import bigTexBanner from "@/assets/big-tex-sports-bar.png.asset.json";
 import mississippiBluesBar from "@/assets/mississippi-blues-bar.png.asset.json";
@@ -144,12 +144,8 @@ function VenueRoom() {
   const venueTopic = personality.pinned;
   const venueCta = personality.primaryCta;
 
-  const prompts =
-    (isTexas ? TEXAS_VENUE_PROMPTS[venue.id] : undefined) ??
-    VENUE_PROMPTS[venue.id] ??
-    [];
-  const messages = buildChat(state.live + venue.id.length, prompts);
-  const liveHere = Math.max(40, Math.floor(state.live / 4));
+  const { room, messages, sendMessage, toggleReaction } = useStateRoomChat(state.id, venue.id);
+  const liveHere = room?.active_users ?? Math.max(40, Math.floor(state.live / 4));
 
   const atmClass =
     venue.id === "sports-bar" ? "atm-stadium"
@@ -275,6 +271,8 @@ function VenueRoom() {
           accentGlow={venue.glow}
           stateId={state.id}
           venueId={venue.id}
+          onSend={sendMessage}
+          onReact={toggleReaction}
         />
       </main>
 

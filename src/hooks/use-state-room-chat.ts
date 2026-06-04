@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { ChatMessage } from "@/lib/mockChat";
 import { checkAndUpgradeRank } from "@/lib/rank-utils";
+import type { Tables } from "@/integrations/supabase/types";
 
 const REACTION_EMOJIS = ["🔥", "🇺🇸", "💬", "⚡", "❤️"];
+const TIME_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
 type DbMessage = {
   id: string;
@@ -63,44 +65,89 @@ function buildChatMessage(
   };
 }
 
-export function useNationalChat() {
+export function useStateRoomChat(stateId: string, venueId: string) {
+  const [room, setRoom] = useState<Tables<"rooms"> | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const currentUserIdRef = useRef<string | null>(null);
+  const roomIdRef = useRef<string | null>(null);
   const reactionsRef = useRef<DbReaction[]>([]);
   const messagesRef = useRef<DbMessage[]>([]);
 
   useEffect(() => {
     let channel: ReturnType<typeof supabase.channel> | null = null;
+    let timeInterval: ReturnType<typeof setInterval> | null = null;
 
     async function init() {
       const { data: { session } } = await supabase.auth.getSession();
       const uid = session?.user?.id ?? null;
-      setCurrentUserId(uid);
+      currentUserIdRef.current = uid;
 
+      // Fetch the room record
+      const { data: roomRow } = await supabase
+        .from("rooms")
+        .select("*")
+        .eq("state", stateId)
+        .eq("room_type", venueId)
+        .maybeSingle();
+
+      if (!roomRow) { setLoading(false); return; }
+      setRoom(roomRow);
+      roomIdRef.current = roomRow.id;
+
+      // Fetch last 50 messages + their reactions in parallel
       const [{ data: msgRows }, { data: reactionRows }] = await Promise.all([
         supabase
           .from("messages")
           .select("id, content, created_at, user_id, users(username, display_name, home_state, rank)")
-          .eq("is_national", true)
+          .eq("room_id", roomRow.id)
           .order("created_at", { ascending: false })
           .limit(50) as Promise<{ data: DbMessage[] | null }>,
-        supabase.from("reactions").select("id, message_id, reaction_type, user_id"),
+        supabase
+          .from("reactions")
+          .select("id, message_id, reaction_type, user_id"),
       ]);
 
       const rows = (msgRows ?? []).reverse();
       const reactions = reactionRows ?? [];
       messagesRef.current = rows;
       reactionsRef.current = reactions;
-
       setMessages(rows.map((r) => buildChatMessage(r, reactions, uid)));
       setLoading(false);
 
+      // Record visit + increment active_users
+      if (uid) {
+        await Promise.all([
+          supabase.rpc("increment_room_users", { p_room_id: roomRow.id }),
+          supabase.from("room_visits").upsert(
+            { user_id: uid, room_id: roomRow.id, state: stateId, room_type: venueId, last_visited: new Date().toISOString() },
+            { onConflict: "user_id,room_id" },
+          ),
+        ]);
+
+        // Every 5 minutes, increment total_minutes on room_visits
+        timeInterval = setInterval(async () => {
+          const { data: visitRow } = await supabase
+            .from("room_visits")
+            .select("id, total_minutes")
+            .eq("user_id", uid)
+            .eq("room_id", roomRow.id)
+            .maybeSingle();
+          if (visitRow) {
+            await supabase
+              .from("room_visits")
+              .update({ total_minutes: visitRow.total_minutes + 5, last_visited: new Date().toISOString() })
+              .eq("id", visitRow.id);
+          }
+        }, TIME_INTERVAL_MS);
+      }
+
+      // Realtime subscription scoped to this room
       channel = supabase
-        .channel("national-chat")
+        .channel(`room-${roomRow.id}`)
         .on(
           "postgres_changes",
-          { event: "INSERT", schema: "public", table: "messages", filter: "is_national=eq.true" },
+          { event: "INSERT", schema: "public", table: "messages", filter: `room_id=eq.${roomRow.id}` },
           async (payload) => {
             const newMsg = payload.new as { id: string; content: string; created_at: string; user_id: string };
             const { data: userData } = await supabase
@@ -133,26 +180,35 @@ export function useNationalChat() {
     }
 
     init();
-    return () => { channel?.unsubscribe(); };
-  }, []);
+
+    return () => {
+      channel?.unsubscribe();
+      if (timeInterval) clearInterval(timeInterval);
+      // Decrement active_users on leave
+      if (roomIdRef.current) {
+        supabase.rpc("decrement_room_users", { p_room_id: roomIdRef.current });
+      }
+    };
+  }, [stateId, venueId]);
 
   async function sendMessage(content: string) {
     const trimmed = content.trim();
-    if (!trimmed) return;
+    if (!trimmed || !roomIdRef.current) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
     const { data: userRow } = await supabase
       .from("users")
-      .select("home_state, messages_sent")
+      .select("messages_sent")
       .eq("id", session.user.id)
       .maybeSingle();
 
     await supabase.from("messages").insert({
       content: trimmed,
       user_id: session.user.id,
-      is_national: true,
-      state: userRow?.home_state ?? "Texas",
+      room_id: roomIdRef.current,
+      state: stateId,
+      is_national: false,
     });
 
     const newCount = (userRow?.messages_sent ?? 0) + 1;
@@ -176,7 +232,6 @@ export function useNationalChat() {
         reaction_type: emoji,
         user_id: session.user.id,
       });
-      // Increment author's reactions_received
       if (authorId && authorId !== session.user.id) {
         const { data: authorRow } = await supabase
           .from("users")
@@ -190,5 +245,5 @@ export function useNationalChat() {
     }
   }
 
-  return { messages, loading, sendMessage, toggleReaction };
+  return { room, messages, loading, sendMessage, toggleReaction };
 }
