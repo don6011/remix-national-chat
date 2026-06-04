@@ -67,55 +67,69 @@ function buildChatMessage(
 export function useStateRoomChat(stateId: string, venueId: string) {
   const [room, setRoom] = useState<Tables<"rooms"> | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState(false); // true only once room + messages are loaded
   const uidRef = useRef<string | null>(null);
   const roomIdRef = useRef<string | null>(null);
   const reactionsRef = useRef<DbReaction[]>([]);
   const messagesRef = useRef<DbMessage[]>([]);
-  // Track IDs we've already added via optimistic update so Realtime doesn't duplicate them
   const optimisticIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
+    // Reset everything for this room so navigation between rooms is clean
+    roomIdRef.current = null;
+    messagesRef.current = [];
+    reactionsRef.current = [];
+    optimisticIds.current = new Set();
+    setRoom(null);
+    setMessages([]);
+    setReady(false);
+
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let timeInterval: ReturnType<typeof setInterval> | null = null;
+    let cancelled = false; // guard against setting state after unmount
 
     async function init() {
       const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
       uidRef.current = session?.user?.id ?? null;
       const uid = uidRef.current;
 
-      // 1. Fetch room record
-      const { data: roomRow } = await supabase
+      // Fetch room by state + room_type
+      const { data: roomRow, error: roomErr } = await supabase
         .from("rooms")
         .select("*")
         .eq("state", stateId)
         .eq("room_type", venueId)
         .maybeSingle();
 
-      if (!roomRow) { setLoading(false); return; }
-      setRoom(roomRow);
-      roomIdRef.current = roomRow.id;
+      if (cancelled) return;
+      if (roomErr || !roomRow) {
+        setReady(true); // unblock UI so empty state shows
+        return;
+      }
 
-      // 2. Subscribe to Realtime IMMEDIATELY — before any other async work
-      //    so messages sent right after mount are captured.
+      roomIdRef.current = roomRow.id;
+      setRoom(roomRow);
+
+      // Subscribe to Realtime before fetching history so no messages are missed
       channel = supabase
-        .channel(`room-${roomRow.id}`)
+        .channel(`room-${roomRow.id}-${Date.now()}`) // unique name prevents stale channel reuse
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "messages", filter: `room_id=eq.${roomRow.id}` },
           async (payload) => {
+            if (cancelled) return;
             const incoming = payload.new as { id: string; content: string; created_at: string; user_id: string };
-            // Skip if we already added this via optimistic update
             if (optimisticIds.current.has(incoming.id)) {
               optimisticIds.current.delete(incoming.id);
               return;
             }
-            // Fetch user data for messages from other users
             const { data: userData } = await supabase
               .from("users")
               .select("username, display_name, home_state, rank")
               .eq("id", incoming.user_id)
               .maybeSingle();
+            if (cancelled) return;
             const full: DbMessage = { ...incoming, users: userData ?? null };
             messagesRef.current = [...messagesRef.current, full];
             setMessages(messagesRef.current.map((r) => buildChatMessage(r, reactionsRef.current, uid)));
@@ -125,6 +139,7 @@ export function useStateRoomChat(stateId: string, venueId: string) {
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "reactions" },
           (payload) => {
+            if (cancelled) return;
             reactionsRef.current = [...reactionsRef.current, payload.new as DbReaction];
             setMessages(messagesRef.current.map((r) => buildChatMessage(r, reactionsRef.current, uid)));
           },
@@ -133,13 +148,14 @@ export function useStateRoomChat(stateId: string, venueId: string) {
           "postgres_changes",
           { event: "DELETE", schema: "public", table: "reactions" },
           (payload) => {
+            if (cancelled) return;
             reactionsRef.current = reactionsRef.current.filter((r) => r.id !== (payload.old as DbReaction).id);
             setMessages(messagesRef.current.map((r) => buildChatMessage(r, reactionsRef.current, uid)));
           },
         )
         .subscribe();
 
-      // 3. Fetch last 50 messages + reactions in parallel
+      // Fetch last 50 messages + reactions
       const [{ data: msgRows }, { data: reactionRows }] = await Promise.all([
         supabase
           .from("messages")
@@ -152,14 +168,16 @@ export function useStateRoomChat(stateId: string, venueId: string) {
           .select("id, message_id, reaction_type, user_id"),
       ]);
 
+      if (cancelled) return;
+
       const rows = (msgRows ?? []).reverse();
       const reactions = reactionRows ?? [];
       messagesRef.current = rows;
       reactionsRef.current = reactions;
       setMessages(rows.map((r) => buildChatMessage(r, reactions, uid)));
-      setLoading(false);
+      setReady(true);
 
-      // 4. Room visit tracking + active_users (fire and forget — non-blocking)
+      // Room visit + active_users (fire and forget)
       if (uid) {
         supabase.rpc("increment_room_users", { p_room_id: roomRow.id });
         supabase.from("room_visits").upsert(
@@ -168,14 +186,15 @@ export function useStateRoomChat(stateId: string, venueId: string) {
         );
 
         timeInterval = setInterval(async () => {
+          if (cancelled) return;
           const { data: visitRow } = await supabase
             .from("room_visits")
             .select("id, total_minutes")
             .eq("user_id", uid)
             .eq("room_id", roomRow.id)
             .maybeSingle();
-          if (visitRow) {
-            await supabase
+          if (visitRow && !cancelled) {
+            supabase
               .from("room_visits")
               .update({ total_minutes: visitRow.total_minutes + 5, last_visited: new Date().toISOString() })
               .eq("id", visitRow.id);
@@ -187,6 +206,7 @@ export function useStateRoomChat(stateId: string, venueId: string) {
     init();
 
     return () => {
+      cancelled = true;
       channel?.unsubscribe();
       if (timeInterval) clearInterval(timeInterval);
       if (roomIdRef.current) {
@@ -197,24 +217,28 @@ export function useStateRoomChat(stateId: string, venueId: string) {
 
   async function sendMessage(content: string) {
     const trimmed = content.trim();
-    if (!trimmed || !roomIdRef.current) return;
+    // Guard: room must be loaded before we allow sends
+    if (!trimmed || !roomIdRef.current || !ready) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    const now = new Date().toISOString();
-
-    // Optimistic update — message appears immediately in the UI
-    const tempId = `optimistic-${Date.now()}`;
+    // Fetch the sender's profile for the optimistic message display
     const { data: meRow } = await supabase
       .from("users")
       .select("username, display_name, home_state, rank, messages_sent")
       .eq("id", session.user.id)
       .maybeSingle();
 
+    // Snapshot roomId in case it changes during the async insert
+    const currentRoomId = roomIdRef.current;
+    if (!currentRoomId) return;
+
+    // Optimistic update — appears immediately, no waiting for Realtime
+    const tempId = `opt-${Date.now()}`;
     const optimisticMsg: DbMessage = {
       id: tempId,
       content: trimmed,
-      created_at: now,
+      created_at: new Date().toISOString(),
       user_id: session.user.id,
       users: meRow ? {
         username: meRow.username,
@@ -226,23 +250,26 @@ export function useStateRoomChat(stateId: string, venueId: string) {
     messagesRef.current = [...messagesRef.current, optimisticMsg];
     setMessages(messagesRef.current.map((r) => buildChatMessage(r, reactionsRef.current, uidRef.current)));
 
-    // Insert into DB
-    const { data: inserted, error } = await supabase.from("messages").insert({
-      content: trimmed,
-      user_id: session.user.id,
-      room_id: roomIdRef.current,
-      state: stateId,
-      is_national: false,
-    }).select("id").single();
+    const { data: inserted, error } = await supabase
+      .from("messages")
+      .insert({
+        content: trimmed,
+        user_id: session.user.id,
+        room_id: currentRoomId,
+        state: stateId,
+        is_national: false,
+      })
+      .select("id")
+      .single();
 
     if (error) {
-      // Roll back optimistic update on failure
+      // Roll back optimistic on failure
       messagesRef.current = messagesRef.current.filter((m) => m.id !== tempId);
       setMessages(messagesRef.current.map((r) => buildChatMessage(r, reactionsRef.current, uidRef.current)));
       return;
     }
 
-    // Replace temp ID with real DB ID and register it so Realtime skips it
+    // Swap temp ID with real DB ID; register it so Realtime skips the duplicate
     if (inserted?.id) {
       optimisticIds.current.add(inserted.id);
       messagesRef.current = messagesRef.current.map((m) =>
@@ -286,5 +313,5 @@ export function useStateRoomChat(stateId: string, venueId: string) {
     }
   }
 
-  return { room, messages, loading, sendMessage, toggleReaction };
+  return { room, messages, ready, sendMessage, toggleReaction };
 }
