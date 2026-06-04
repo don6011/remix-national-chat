@@ -7,8 +7,8 @@ import { StatePulsePanel } from "@/components/StatePulsePanel";
 import { Button } from "@/components/ui/button";
 import { getState, STATES } from "@/lib/states";
 import { getDestinations } from "@/lib/destinations";
-import { buildChat } from "@/lib/mockChat";
 import { supabase as sb } from "@/integrations/supabase/client";
+import { useStateLobbyChat } from "@/hooks/use-state-lobby-chat";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Trophy, Flame, Users } from "lucide-react";
 import floridaBanner from "@/assets/florida-welcome-banner.png.asset.json";
@@ -64,13 +64,7 @@ function StateSpace() {
       });
   }, [state.id]);
 
-  const messages = buildChat(state.live, [
-    `${state.name} in the building. Who's repping tonight?`,
-    state.trendingTopic + " — thoughts?",
-    `Just walked into the ${state.name} space. Vibe is unreal.`,
-    `Y'all see the ranking? ${state.name} climbing.`,
-    `Local question: best diner in ${state.name}?`,
-  ]);
+  const { messages, ready: chatReady, sendMessage, toggleReaction } = useStateLobbyChat(state.id);
 
   const ranking = STATES.findIndex((s) => s.id === state.id) + 1;
 
@@ -228,6 +222,11 @@ function StateSpace() {
           pinned={`${state.name} pinned: ${state.trendingTopic}`}
           placeholder={`Speak up, ${state.name}…`}
           accentGlow={state.glow}
+          stateId={state.id}
+          venueId="general"
+          disabled={!chatReady}
+          onSend={sendMessage}
+          onReact={toggleReaction}
         />
 
 
