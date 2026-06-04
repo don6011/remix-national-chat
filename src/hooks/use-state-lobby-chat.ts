@@ -249,13 +249,12 @@ export function useStateLobbyChat(stateId: string) {
         room_id: currentRoomId,
         state: stateId,
         is_national: false,
-        topic: "",
-        extension: "",
       })
       .select("id")
       .single();
 
     if (error) {
+      console.error("[useStateLobbyChat] insert error:", error);
       messagesRef.current = messagesRef.current.filter((m) => m.id !== tempId);
       setMessages(messagesRef.current.map((r) => buildChatMessage(r, reactionsRef.current, uidRef.current)));
       return;
