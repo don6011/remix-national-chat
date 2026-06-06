@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
@@ -6,7 +7,6 @@ import {
   Flame,
   Trophy,
   Vote,
-  ArrowUpRight,
   ChevronDown,
   Crown,
   Sparkles,
@@ -16,12 +16,16 @@ import {
 } from "lucide-react";
 import { ChatFeed } from "@/components/ChatFeed";
 import { DestinationCard } from "@/components/DestinationCard";
-import { buildChat } from "@/lib/mockChat";
 import { getState, STATES } from "@/lib/states";
 import { getDestinations } from "@/lib/destinations";
+import { useStateLobbyChat } from "@/hooks/use-state-lobby-chat";
 import texasBanner from "@/assets/texas-lone-star-banner.png.asset.json";
 
 export const Route = createFileRoute("/states/texas/")({
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/login" });
+  },
   head: () => ({
     meta: [
       { title: "Texas — National Chat" },
@@ -70,6 +74,7 @@ function TexasSpace() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const countdown = useCountdown(3);
   const ranking = STATES.findIndex((s) => s.id === state.id) + 1;
+  const { messages, ready: chatReady, sendMessage, toggleReaction } = useStateLobbyChat("texas");
 
   // Live citizens count fluctuates
   useEffect(() => {
@@ -90,15 +95,6 @@ function TexasSpace() {
     }, 3200);
     return () => clearInterval(i);
   }, []);
-
-  const messages = buildChat(citizens, [
-    "Y'all see Big Tex packed already? Wild night.",
-    "Town Hall has a housing vote going — check it.",
-    "Cowboys win tonight or I'm logging off forever.",
-    "Just moved to Austin — what's the move tonight?",
-    "Texas climbing the rankings AGAIN. Who's surprised.",
-    "LoneStarMaya pinned the best take I've seen all week.",
-  ]);
 
   return (
     <div className="relative">
@@ -254,6 +250,11 @@ function TexasSpace() {
           pinned={`🤠 Texas pinned: Cowboys vs Eagles tonight — The Roadhouse packed`}
           placeholder="Speak up, Texas…"
           accentGlow="oklch(0.70 0.24 28 / 0.5)"
+          stateId="texas"
+          venueId="general"
+          disabled={!chatReady}
+          onSend={sendMessage}
+          onReact={toggleReaction}
         />
       </main>
 
